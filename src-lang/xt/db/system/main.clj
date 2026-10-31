@@ -4,48 +4,24 @@
 (l/script :xtalk
   {:require [[xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]
+             [xt.lang.common-protocol :as protocol]
              [xt.db.system.main-client :as main-client]
-             [xt.db.system.impl-common :as impl-common]
-             [xt.db.system.impl-sqlite :as impl-sqlite]
-             [xt.db.system.impl-postgres :as impl-postgres]
-             [xt.db.system.impl-memory :as impl-memory]
-             [xt.db.system.impl-supabase :as impl-supabase]]})
+             [xt.db.system.impl-common :as common]
+             [xt.db.system.impl-memory :as memory]]})
 
 (defn.xt create-impl
-  "creates impls for local and live backends"
-  {:added "4.1"}
-  [type defaults schema lookup]
-  (var client (main-client/create-client type defaults))
-  (cond (== type "memory")
-        (return
-         (impl-memory/impl-memory schema lookup))
-
-        (== type "sqlite")
-        (return
-         (impl-sqlite/impl-sqlite client schema lookup))
-
-        (== type "postgres")
-        (return
-         (impl-postgres/impl-postgres client schema lookup))
-
-        (== type "supabase")
-        (return
-         (impl-supabase/impl-supabase client schema lookup))))
+  "Creates memory by default; other backends require an explicit provider map."
+  [type defaults schema lookup (:.. optional)]
+  (var backends (:? (> (xt/x:len optional) 0) (xt/x:first optional) nil))
+  (when (== type "memory") (return (memory/impl-memory schema lookup)))
+  (var provider (main-client/get-provider type backends))
+  (var create (xt/x:get-key provider "create_impl" nil))
+  (when (not (xt/x:is-function? create)) (xt/x:err "Backend provider is missing create_impl"))
+  (return (create (main-client/create-client type defaults backends) schema lookup)))
 
 (defn.xt create-impl-init
-  "initialises postgres impls and leaves the wrapper output usable"
-  {:added "4.1"}
+  "Initializes implementations through their optional initialization protocol."
   [impl]
-  (var #{schema lookup} impl)
-  (var type (. impl ["::"]))
-  (cond (== type "xt.db.system.impl_sqlite/ImplSqlite")
-        (return
-         (impl-sqlite/impl-sqlite-init impl))
-
-        (== type "xt.db.system.impl_postgres/ImplPostgres")
-        (return
-         (impl-postgres/impl-postgres-init impl))
-
-        :else
-        (return
-         (promise/x:promise-run impl))))
+  (when (protocol/protocol-implements impl (xt/x:get-key common/ISourceInit "on" nil))
+    (return (common/init-db impl)))
+  (return (promise/x:promise-run impl)))

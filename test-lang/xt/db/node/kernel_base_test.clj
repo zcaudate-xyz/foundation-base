@@ -27,7 +27,11 @@
 
 (l/script- :js
   {:runtime :basic
-   :require [[xt.lang.common-data :as xtd]
+   :require [[xt.db.system.backend-postgres]
+             [xt.db.system.backend-sqlite]
+             [xt.db.node.kernel-supabase]
+             [xt.db.system.backend-supabase :as backend-supabase]
+             [xt.lang.common-data :as xtd]
              [xt.lang.common-tree :as tree]
              [xt.lang.common-repl :as repl]
              [xt.lang.common-protocol :as proto]
@@ -51,7 +55,7 @@
 
 (defn.js node-init-postgres
   [node]
-  (:= node (or node (substrate/node-create {})))
+  (:= node (or node (xt.db.node.kernel-base/set-backends (substrate/node-create {}) {"postgres" (xt.db.system.backend-postgres/provider) "sqlite" (xt.db.system.backend-sqlite/provider) "supabase" (xt.db.system.backend-supabase/provider)})))
   (return
    (kernel/kernel-setup-main
     node
@@ -64,7 +68,7 @@
 
 (defn.js node-init-supabase
   [node]
-  (:= node (or node (substrate/node-create {})))
+  (:= node (or node (xt.db.node.kernel-base/set-backends (substrate/node-create {}) {"postgres" (xt.db.system.backend-postgres/provider) "sqlite" (xt.db.system.backend-sqlite/provider) "supabase" (xt.db.system.backend-supabase/provider)})))
   (return
    (kernel/kernel-setup-main
     node
@@ -85,7 +89,7 @@
 (fact "gets the primary impl from a service id"
 
   (notify/wait-on :js
-    (var node (substrate/node-create {}))
+    (var node (xt.db.node.kernel-base/set-backends (substrate/node-create {}) {"postgres" (xt.db.system.backend-postgres/provider) "sqlite" (xt.db.system.backend-sqlite/provider) "supabase" (xt.db.system.backend-supabase/provider)}))
     (-> (-/node-init-postgres node)
         (promise/x:promise-then
          (fn []
@@ -99,7 +103,7 @@
 (fact "gets the caching impl from a primary service id"
 
   (notify/wait-on :js
-    (var node (substrate/node-create {}))
+    (var node (xt.db.node.kernel-base/set-backends (substrate/node-create {}) {"postgres" (xt.db.system.backend-postgres/provider) "sqlite" (xt.db.system.backend-sqlite/provider) "supabase" (xt.db.system.backend-supabase/provider)}))
     (-> (-/node-init-postgres node)
         (promise/x:promise-then
          (fn []
@@ -133,7 +137,7 @@
 (fact "checks whether common, primary and caching services are all present"
 
   (!.js
-    (var node (substrate/node-create {}))
+    (var node (xt.db.node.kernel-base/set-backends (substrate/node-create {}) {"postgres" (xt.db.system.backend-postgres/provider) "sqlite" (xt.db.system.backend-sqlite/provider) "supabase" (xt.db.system.backend-supabase/provider)}))
     (kernel/kernel-check-exists
      node
      {"primary" {"type" "memory"}
@@ -141,7 +145,7 @@
   => false
 
   (!.js
-    (var node (substrate/node-create {}))
+    (var node (xt.db.node.kernel-base/set-backends (substrate/node-create {}) {"postgres" (xt.db.system.backend-postgres/provider) "sqlite" (xt.db.system.backend-sqlite/provider) "supabase" (xt.db.system.backend-supabase/provider)}))
     (substrate/set-service node "db/common" {})
     (substrate/set-service node "db/primary" {})
     (substrate/set-service node "db/caching" {})
@@ -155,7 +159,7 @@
 (fact "installs a single live impl on the node"
 
   (notify/wait-on :js
-    (var node (substrate/node-create {}))
+    (var node (xt.db.node.kernel-base/set-backends (substrate/node-create {}) {"postgres" (xt.db.system.backend-postgres/provider) "sqlite" (xt.db.system.backend-sqlite/provider) "supabase" (xt.db.system.backend-supabase/provider)}))
     (-> (kernel/kernel-setup-single node "db/primary" "memory" {} -/Schema -/SchemaLookup)
         (promise/x:promise-then
          (fn [out]
@@ -169,7 +173,7 @@
 (fact "tears down a single base service"
 
   (notify/wait-on :js
-    (var node (substrate/node-create {}))
+    (var node (xt.db.node.kernel-base/set-backends (substrate/node-create {}) {"postgres" (xt.db.system.backend-postgres/provider) "sqlite" (xt.db.system.backend-sqlite/provider) "supabase" (xt.db.system.backend-supabase/provider)}))
     (-> (kernel/kernel-setup-single node "db/primary" "memory" {} -/Schema -/SchemaLookup)
         (promise/x:promise-then
          (fn []
@@ -183,7 +187,7 @@
 (fact "sets up common, primary and caching services with metadata"
 
   (notify/wait-on :js
-    (var node (substrate/node-create {}))
+    (var node (xt.db.node.kernel-base/set-backends (substrate/node-create {}) {"postgres" (xt.db.system.backend-postgres/provider) "sqlite" (xt.db.system.backend-sqlite/provider) "supabase" (xt.db.system.backend-supabase/provider)}))
     (-> (kernel/kernel-setup-main node
                                   {"primary" {"type" "memory" "defaults" {}}
                                    "caching" {"type" "memory" "defaults" {}}}
@@ -196,7 +200,7 @@
 (fact "explicitly sets up base services from handler args"
 
   (notify/wait-on :js
-    (var node (substrate/node-create {}))
+    (var node (xt.db.node.kernel-base/set-backends (substrate/node-create {}) {"postgres" (xt.db.system.backend-postgres/provider) "sqlite" (xt.db.system.backend-sqlite/provider) "supabase" (xt.db.system.backend-supabase/provider)}))
     (-> (kernel/kernel-setup-handler
          nil
          [{"primary" {"type" "memory" "defaults" {}}
@@ -212,7 +216,7 @@
 (fact "tears down common, primary and caching services"
 
   (notify/wait-on :js
-    (var node (substrate/node-create {}))
+    (var node (xt.db.node.kernel-base/set-backends (substrate/node-create {}) {"postgres" (xt.db.system.backend-postgres/provider) "sqlite" (xt.db.system.backend-sqlite/provider) "supabase" (xt.db.system.backend-supabase/provider)}))
     (var config {"primary" {"type" "memory" "defaults" {}}
                  "caching" {"type" "memory" "defaults" {}}})
     (-> (kernel/kernel-setup-main node config -/Schema -/SchemaLookup)
@@ -227,7 +231,7 @@
 (fact "tears down base services from a handler arg"
 
   (notify/wait-on :js
-    (var node (substrate/node-create {}))
+    (var node (xt.db.node.kernel-base/set-backends (substrate/node-create {}) {"postgres" (xt.db.system.backend-postgres/provider) "sqlite" (xt.db.system.backend-sqlite/provider) "supabase" (xt.db.system.backend-supabase/provider)}))
     (var config {"primary" {"type" "memory" "defaults" {}}
                  "caching" {"type" "memory" "defaults" {}}})
     (-> (kernel/kernel-setup-main node config -/Schema -/SchemaLookup)
@@ -242,7 +246,7 @@
 (fact "ensures base services are present"
 
   (notify/wait-on :js
-    (var node (substrate/node-create {}))
+    (var node (xt.db.node.kernel-base/set-backends (substrate/node-create {}) {"postgres" (xt.db.system.backend-postgres/provider) "sqlite" (xt.db.system.backend-sqlite/provider) "supabase" (xt.db.system.backend-supabase/provider)}))
     (var config {"primary" {"type" "memory" "defaults" {}}
                  "caching" {"type" "memory" "defaults" {}}})
     (-> (kernel/kernel-init-main node config -/Schema -/SchemaLookup)
@@ -256,7 +260,7 @@
 (fact "initialises base services from handler args if needed"
 
   (notify/wait-on :js
-    (var node (substrate/node-create {}))
+    (var node (xt.db.node.kernel-base/set-backends (substrate/node-create {}) {"postgres" (xt.db.system.backend-postgres/provider) "sqlite" (xt.db.system.backend-sqlite/provider) "supabase" (xt.db.system.backend-supabase/provider)}))
     (-> (kernel/kernel-init-handler
          nil
          [{"primary" {"type" "memory" "defaults" {}}
@@ -280,7 +284,7 @@
     (var impl (impl-main/create-impl "supabase"
                                      (@! local-min/+config-supabase-anon+)
                                      -/Schema
-                                     -/SchemaLookup))
+                                     -/SchemaLookup {"supabase" (xt.db.system.backend-supabase/provider)}))
     (repl/notify
      (realtime/subscribe impl "default" ["realtime:room:sub-test-1"
                                          "realtime:room:sub-test-2"])))
@@ -291,7 +295,7 @@
   ;; FROM HANDLER
   ;;
   (notify/wait-on :js
-    (var node (substrate/node-create {}))
+    (var node (xt.db.node.kernel-base/set-backends (substrate/node-create {}) {"postgres" (xt.db.system.backend-postgres/provider) "sqlite" (xt.db.system.backend-sqlite/provider) "supabase" (xt.db.system.backend-supabase/provider)}))
     (-> (-/node-init-supabase node)
         (promise/x:promise-then
          (fn []
@@ -311,7 +315,7 @@
 (fact "unsubscribes from the db handler"
 
   (notify/wait-on :js
-    (var node (substrate/node-create {}))
+    (var node (xt.db.node.kernel-base/set-backends (substrate/node-create {}) {"postgres" (xt.db.system.backend-postgres/provider) "sqlite" (xt.db.system.backend-sqlite/provider) "supabase" (xt.db.system.backend-supabase/provider)}))
     (-> (-/node-init-supabase node)
         (promise/x:promise-then
          (fn []
@@ -345,7 +349,7 @@
 (fact "sync-cached-handler applies db/sync payload to the paired caching db"
 
   (notify/wait-on :js
-    (var node (substrate/node-create {}))
+    (var node (xt.db.node.kernel-base/set-backends (substrate/node-create {}) {"postgres" (xt.db.system.backend-postgres/provider) "sqlite" (xt.db.system.backend-sqlite/provider) "supabase" (xt.db.system.backend-supabase/provider)}))
     (-> (-/node-init-supabase node)
         (promise/x:promise-then
          (fn []
@@ -359,7 +363,7 @@
   => true
 
   (notify/wait-on :js
-    (var node (substrate/node-create {}))
+    (var node (xt.db.node.kernel-base/set-backends (substrate/node-create {}) {"postgres" (xt.db.system.backend-postgres/provider) "sqlite" (xt.db.system.backend-sqlite/provider) "supabase" (xt.db.system.backend-supabase/provider)}))
     (-> (-/node-init-supabase node)
         (promise/x:promise-then
          (fn [out]
@@ -386,7 +390,7 @@
 (fact "attach-base-model registers a db listener when options.refresh is set"
 
   (notify/wait-on :js
-    (var node (substrate/node-create {}))
+    (var node (xt.db.node.kernel-base/set-backends (substrate/node-create {}) {"postgres" (xt.db.system.backend-postgres/provider) "sqlite" (xt.db.system.backend-sqlite/provider) "supabase" (xt.db.system.backend-supabase/provider)}))
     (-> (-/node-init-postgres node)
         (promise/x:promise-then
          (fn []
@@ -417,7 +421,7 @@
   => [1]
 
   (notify/wait-on :js
-    (var node (substrate/node-create {}))
+    (var node (xt.db.node.kernel-base/set-backends (substrate/node-create {}) {"postgres" (xt.db.system.backend-postgres/provider) "sqlite" (xt.db.system.backend-sqlite/provider) "supabase" (xt.db.system.backend-supabase/provider)}))
     (-> (kernel/kernel-setup-main node
                                   {"primary" {"type" "memory" "defaults" {}}
                                    "caching" {"type" "memory" "defaults" {}}}
@@ -448,7 +452,7 @@
 (fact "attach-model-handler attaches a page model to the node"
 
   (notify/wait-on :js
-    (var node (substrate/node-create {}))
+    (var node (xt.db.node.kernel-base/set-backends (substrate/node-create {}) {"postgres" (xt.db.system.backend-postgres/provider) "sqlite" (xt.db.system.backend-sqlite/provider) "supabase" (xt.db.system.backend-supabase/provider)}))
     (-> (kernel/kernel-setup-main node
                                   {"primary" {"type" "memory" "defaults" {}}
                                    "caching" {"type" "memory" "defaults" {}}}
@@ -476,7 +480,7 @@
 (fact "detach-base-model removes the model and its db listener"
 
   (notify/wait-on :js
-    (var node (substrate/node-create {}))
+    (var node (xt.db.node.kernel-base/set-backends (substrate/node-create {}) {"postgres" (xt.db.system.backend-postgres/provider) "sqlite" (xt.db.system.backend-sqlite/provider) "supabase" (xt.db.system.backend-supabase/provider)}))
     (-> (kernel/kernel-setup-main node
                                   {"primary" {"type" "memory" "defaults" {}}
                                    "caching" {"type" "memory" "defaults" {}}}
@@ -502,7 +506,7 @@
 (fact "detach-model-handler detaches a page model from the node"
 
   (notify/wait-on :js
-    (var node (substrate/node-create {}))
+    (var node (xt.db.node.kernel-base/set-backends (substrate/node-create {}) {"postgres" (xt.db.system.backend-postgres/provider) "sqlite" (xt.db.system.backend-sqlite/provider) "supabase" (xt.db.system.backend-supabase/provider)}))
     (-> (kernel/kernel-setup-main node
                                   {"primary" {"type" "memory" "defaults" {}}
                                    "caching" {"type" "memory" "defaults" {}}}
@@ -538,7 +542,7 @@
 (fact "rpc-call-baseline-fn routes rpc args and syncs result to caching"
 
   (notify/wait-on :js
-    (var node (substrate/node-create {}))
+    (var node (xt.db.node.kernel-base/set-backends (substrate/node-create {}) {"postgres" (xt.db.system.backend-postgres/provider) "sqlite" (xt.db.system.backend-sqlite/provider) "supabase" (xt.db.system.backend-supabase/provider)}))
     (-> (-/node-init-postgres node)
         (promise/x:promise-then
          (fn []
@@ -570,7 +574,7 @@
 (fact "rpc-call-handler routes rpc args through a named service"
 
   (notify/wait-on :js
-    (var node (substrate/node-create {}))
+    (var node (xt.db.node.kernel-base/set-backends (substrate/node-create {}) {"postgres" (xt.db.system.backend-postgres/provider) "sqlite" (xt.db.system.backend-sqlite/provider) "supabase" (xt.db.system.backend-supabase/provider)}))
     (-> (-/node-init-postgres node)
         (promise/x:promise-then
          (fn []
@@ -600,7 +604,7 @@
   ;; WITHOUT TABLE will not sync
   ;;
   (notify/wait-on :js
-    (var node (substrate/node-create {}))
+    (var node (xt.db.node.kernel-base/set-backends (substrate/node-create {}) {"postgres" (xt.db.system.backend-postgres/provider) "sqlite" (xt.db.system.backend-sqlite/provider) "supabase" (xt.db.system.backend-supabase/provider)}))
     (-> (-/node-init-postgres node)
         (promise/x:promise-then
          (fn []
@@ -652,7 +656,7 @@
 (fact "rpc-attach-model attaches and invokes an rpc model"
 
   (notify/wait-on :js
-    (var node (substrate/node-create {}))
+    (var node (xt.db.node.kernel-base/set-backends (substrate/node-create {}) {"postgres" (xt.db.system.backend-postgres/provider) "sqlite" (xt.db.system.backend-sqlite/provider) "supabase" (xt.db.system.backend-supabase/provider)}))
     (-> (-/node-init-postgres node)
         (promise/x:promise-then
          (fn []
@@ -692,7 +696,7 @@
 (fact "pull-call-baseline-fn pulls data and syncs result to caching"
 
   (notify/wait-on :js
-    (var node (substrate/node-create {}))
+    (var node (xt.db.node.kernel-base/set-backends (substrate/node-create {}) {"postgres" (xt.db.system.backend-postgres/provider) "sqlite" (xt.db.system.backend-sqlite/provider) "supabase" (xt.db.system.backend-supabase/provider)}))
     (-> (-/node-init-postgres node)
         (promise/x:promise-then
          (fn [out]
@@ -726,7 +730,7 @@
 (fact "pull-call-handler routes pull args through a named service"
 
   (notify/wait-on :js
-    (var node (substrate/node-create {}))
+    (var node (xt.db.node.kernel-base/set-backends (substrate/node-create {}) {"postgres" (xt.db.system.backend-postgres/provider) "sqlite" (xt.db.system.backend-sqlite/provider) "supabase" (xt.db.system.backend-supabase/provider)}))
     (-> (-/node-init-postgres node)
         (promise/x:promise-then
          (fn [out]
@@ -781,7 +785,7 @@
 (fact "pull-attach-model attaches and invokes a pull-view model"
 
   (notify/wait-on :js
-    (var node (substrate/node-create {}))
+    (var node (xt.db.node.kernel-base/set-backends (substrate/node-create {}) {"postgres" (xt.db.system.backend-postgres/provider) "sqlite" (xt.db.system.backend-sqlite/provider) "supabase" (xt.db.system.backend-supabase/provider)}))
     (:= (!:G NODE) node)
     (-> (-/node-init-postgres node)
         (promise/x:promise-then
@@ -855,7 +859,7 @@
 (fact "dataview-call-baseline-fn executes a dataview query and syncs to caching"
 
   (notify/wait-on :js
-    (var node (substrate/node-create {}))
+    (var node (xt.db.node.kernel-base/set-backends (substrate/node-create {}) {"postgres" (xt.db.system.backend-postgres/provider) "sqlite" (xt.db.system.backend-sqlite/provider) "supabase" (xt.db.system.backend-supabase/provider)}))
     (-> (-/node-init-postgres node)
         (promise/x:promise-then
          (fn [out]
@@ -899,7 +903,7 @@
 (fact "dataview-call-handler routes dataview args through a named service"
 
   (notify/wait-on :js
-    (var node (substrate/node-create {}))
+    (var node (xt.db.node.kernel-base/set-backends (substrate/node-create {}) {"postgres" (xt.db.system.backend-postgres/provider) "sqlite" (xt.db.system.backend-sqlite/provider) "supabase" (xt.db.system.backend-supabase/provider)}))
     (-> (-/node-init-postgres node)
         (promise/x:promise-then
          (fn [out]
@@ -972,7 +976,7 @@
 (fact "dataview-attach-model attaches and invokes a dataview model"
 
   (notify/wait-on :js
-    (var node (substrate/node-create {}))
+    (var node (xt.db.node.kernel-base/set-backends (substrate/node-create {}) {"postgres" (xt.db.system.backend-postgres/provider) "sqlite" (xt.db.system.backend-sqlite/provider) "supabase" (xt.db.system.backend-supabase/provider)}))
     (-> (-/node-init-postgres node)
         (promise/x:promise-then
          (fn [_]
@@ -1027,7 +1031,7 @@
 (fact "init-handlers registers the @xt.db handlers"
 
   (!.js
-    (var node (substrate/node-create {}))
+    (var node (xt.db.node.kernel-base/set-backends (substrate/node-create {}) {"postgres" (xt.db.system.backend-postgres/provider) "sqlite" (xt.db.system.backend-sqlite/provider) "supabase" (xt.db.system.backend-supabase/provider)}))
     (kernel/init-handlers node)
     (xt/x:obj-keys (. node ["handlers"])))
   => (contains ["@xt.db/kernel-init"
@@ -1076,7 +1080,7 @@
 (fact "pull-cached-handler returns data already synced to the caching impl"
 
   (notify/wait-on :js
-    (var node (substrate/node-create {}))
+    (var node (xt.db.node.kernel-base/set-backends (substrate/node-create {}) {"postgres" (xt.db.system.backend-postgres/provider) "sqlite" (xt.db.system.backend-sqlite/provider) "supabase" (xt.db.system.backend-supabase/provider)}))
     (-> (-/node-init-postgres node)
         (promise/x:promise-then
          (fn []
@@ -1105,7 +1109,7 @@
 (fact "prepares a query tree from a dataview spec"
 
   (notify/wait-on :js
-    (var node (substrate/node-create {}))
+    (var node (xt.db.node.kernel-base/set-backends (substrate/node-create {}) {"postgres" (xt.db.system.backend-postgres/provider) "sqlite" (xt.db.system.backend-sqlite/provider) "supabase" (xt.db.system.backend-supabase/provider)}))
     (-> (kernel/kernel-setup-main node
                                   {"primary" {"type" "memory" "defaults" {}}
                                    "caching" {"type" "memory" "defaults" {}}}
@@ -1136,7 +1140,7 @@
 (fact "dataview-cached-handler returns a dataview result from the caching impl"
 
   (notify/wait-on :js
-    (var node (substrate/node-create {}))
+    (var node (xt.db.node.kernel-base/set-backends (substrate/node-create {}) {"postgres" (xt.db.system.backend-postgres/provider) "sqlite" (xt.db.system.backend-sqlite/provider) "supabase" (xt.db.system.backend-supabase/provider)}))
     (var dataview {"table" "Log"
                    "select_entry" {"input" []
                                    "view" {"table" "Log"

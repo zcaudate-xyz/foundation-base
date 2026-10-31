@@ -8,7 +8,8 @@
 
 (l/script- :js
   {:runtime :basic
-   :require [[xt.lang.common-notify :as notify]
+   :require [[xt.db.system.backend-supabase :as backend-supabase]
+             [xt.lang.common-notify :as notify]
              [xt.lang.common-repl :as repl]
              [xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]
@@ -69,7 +70,7 @@
 (defn.js live-context
   [node]
   (return {"node" node
-           "runtime" {"config" -/RuntimeConfig
+           "runtime" {"local" {"backends" {"supabase" (backend-supabase/provider)}} "config" -/RuntimeConfig
                       "schema" -/Schema
                       "lookup" -/SchemaLookup}}))
 
@@ -209,7 +210,7 @@
   (notify/wait-on :js
     (var node (substrate/node-create {"id" "action-live-node"}))
     (var context {"node" node
-                  "runtime" {"config" -/RuntimeConfig
+                  "runtime" {"local" {"backends" {"supabase" (backend-supabase/provider)}} "config" -/RuntimeConfig
                              "schema" -/Schema
                              "lookup" -/SchemaLookup}})
     (var view
@@ -241,7 +242,7 @@
   (notify/wait-on :js
     (var node (substrate/node-create {"id" "action-echo-node"}))
     (var context {"node" node
-                  "runtime" {"config" -/RuntimeConfig
+                  "runtime" {"local" {"backends" {"supabase" (backend-supabase/provider)}} "config" -/RuntimeConfig
                              "schema" -/Schema
                              "lookup" -/SchemaLookup}})
     (var output nil)

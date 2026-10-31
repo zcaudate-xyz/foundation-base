@@ -1,6 +1,10 @@
 (ns xt.db.node.runtime-test
   (:use code.test)
-  (:require [lang.core :as l]
+  (:require [xt.db.system.backend-sqlite]
+            [xt.db.system.backend-supabase]
+            [xt.db.node.kernel-base]
+            [xt.db.node.kernel-supabase]
+            [lang.core :as l]
             [lang.runtime.chromedriver :as chromedriver]
             [clojure.string :as str]
             [xt.lang.spec-base :as xt]
@@ -33,7 +37,11 @@
 
 (l/script- :js
   {:runtime :chromedriver.instance
-   :require [[xt.lang.spec-base :as xt]
+   :require [[xt.db.system.backend-sqlite]
+             [xt.db.system.backend-supabase]
+             [xt.db.node.kernel-base]
+             [xt.db.node.kernel-supabase]
+             [xt.lang.spec-base :as xt]
              [xt.lang.common-repl :as repl]
              [xt.lang.spec-promise :as promise]
              [xt.substrate :as substrate]
@@ -50,12 +58,12 @@
 (def +sharedworker-script+
   (runtime/sharedworket-init-string
    {"@sqlite.org/sqlite-wasm" "data:text/javascript,export default {}"
-    "pg" "data:text/javascript,export default {Client: function() {}}"}))
+    "pg" "data:text/javascript,export default {Client: function() {}}"} '{"backends" {"sqlite" (xt.db.system.backend-sqlite/provider) "supabase" (xt.db.system.backend-supabase/provider)} "init_handlers" [xt.db.node.kernel-supabase/init-handlers]}))
 
 (def +webworker-script+
   (runtime/webworker-init-string
    {"@sqlite.org/sqlite-wasm" "data:text/javascript,export default {}"
-    "pg" "data:text/javascript,export default {Client: function() {}}"}))
+    "pg" "data:text/javascript,export default {Client: function() {}}"} '{"backends" {"sqlite" (xt.db.system.backend-sqlite/provider) "supabase" (xt.db.system.backend-supabase/provider)} "init_handlers" [xt.db.node.kernel-supabase/init-handlers]}))
 
 (fact:global
  {:setup [(l/rt:restart)
@@ -71,7 +79,7 @@
 (fact "installs kernel and page-proxy handlers on a node"
 
   (!.js
-   (var node (substrate/node-create {"id" "server"}))
+   (var node (xt.db.node.kernel-base/set-backends (substrate/node-create {"id" "server"}) {"sqlite" (xt.db.system.backend-sqlite/provider) "supabase" (xt.db.system.backend-supabase/provider)}))
    (runtime/init-server node)
    (var handlers (. node ["handlers"]))
    (and (xt/x:not-nil? (xt/x:get-key handlers "@xt.db/kernel-init"))
@@ -79,27 +87,27 @@
         (xt/x:not-nil? (xt/x:get-key handlers "@xt.db/attach-model"))
         (xt/x:not-nil? (xt/x:get-key handlers "@xt.db/detach-model"))
         (xt/x:not-nil? (xt/x:get-key handlers "@xt.db/rpc-call"))
-        (xt/x:not-nil? (xt/x:get-key handlers "@xt.supabase/sign-up"))))
+        (xt/x:nil? (xt/x:get-key handlers "@xt.supabase/sign-up" nil))))
   => true)
 
 ^{:refer xt.db.node.runtime/init-server-proxy :added "4.1"}
 (fact "installs proxy and page-proxy handlers on a node"
 
   (!.js
-   (var node (substrate/node-create {"id" "proxy"}))
+   (var node (xt.db.node.kernel-base/set-backends (substrate/node-create {"id" "proxy"}) {"sqlite" (xt.db.system.backend-sqlite/provider) "supabase" (xt.db.system.backend-supabase/provider)}))
    (runtime/init-server-proxy node)
    (var handlers (. node ["handlers"]))
    (and (xt/x:not-nil? (xt/x:get-key handlers "@xt.db/kernel-init"))
         (xt/x:not-nil? (xt/x:get-key handlers "@xt.db/attach-model"))
         (xt/x:not-nil? (xt/x:get-key handlers "@xt.db/detach-model"))
         (xt/x:not-nil? (xt/x:get-key handlers "@xt.db/rpc-call"))
-        (xt/x:not-nil? (xt/x:get-key handlers "@xt.supabase/sign-up"))))
+        (xt/x:nil? (xt/x:get-key handlers "@xt.supabase/sign-up" nil))))
   => true)
 
 ^{:refer xt.db.node.runtime/sharedworket-init-string :added "4.1"}
 (fact "emits a script string for booting a SharedWorker kernel"
 
-  (let [script (runtime/sharedworket-init-string)]
+  (let [script (runtime/sharedworket-init-string nil '{"backends" {"sqlite" (xt.db.system.backend-sqlite/provider) "supabase" (xt.db.system.backend-supabase/provider)} "init_handlers" [xt.db.node.kernel-supabase/init-handlers]})]
     (and (string? script)
          (> (count script) 0)
          (str/includes? script "sharedworker")))
@@ -108,7 +116,7 @@
 ^{:refer xt.db.node.runtime/webworker-init-string :added "4.1"}
 (fact "emits a script string for booting a WebWorker kernel"
 
-  (let [script (runtime/webworker-init-string)]
+  (let [script (runtime/webworker-init-string nil '{"backends" {"sqlite" (xt.db.system.backend-sqlite/provider) "supabase" (xt.db.system.backend-supabase/provider)} "init_handlers" [xt.db.node.kernel-supabase/init-handlers]})]
     (and (string? script)
          (> (count script) 0)
          (str/includes? script "webworker")))
@@ -118,7 +126,7 @@
 (fact "connects a client to a SharedWorker kernel and initialises it"
 
   (notify/wait-on [:js 20000]
-    (var client (substrate/node-create {"id" "sharedworker-connect-client"}))
+    (var client (xt.db.node.kernel-base/set-backends (substrate/node-create {"id" "sharedworker-connect-client"}) {"sqlite" (xt.db.system.backend-sqlite/provider) "supabase" (xt.db.system.backend-supabase/provider)}))
     (-> (runtime/sharedworker-connect client
                                       {"primary" {"type" "memory" "defaults" {}}
                                        "caching" {"type" "memory" "defaults" {}}}
@@ -142,7 +150,7 @@
 (fact "connect-state initializes a SharedWorker client and returns teardown state"
 
   (notify/wait-on [:js 20000]
-                  (var client (substrate/node-create {"id" "sharedworker-state-client"}))
+                  (var client (xt.db.node.kernel-base/set-backends (substrate/node-create {"id" "sharedworker-state-client"}) {"sqlite" (xt.db.system.backend-sqlite/provider) "supabase" (xt.db.system.backend-supabase/provider)}))
                   (-> (runtime/sharedworker-connect-state client
                                                           {"primary" {"type" "memory" "defaults" {}}
                                                            "caching" {"type" "memory" "defaults" {}}}
@@ -176,7 +184,7 @@
 (fact "disconnect tears down the transport recorded in SharedWorker state"
 
   (notify/wait-on [:js 20000]
-                  (var client (substrate/node-create {"id" "sharedworker-disconnect-client"}))
+                  (var client (xt.db.node.kernel-base/set-backends (substrate/node-create {"id" "sharedworker-disconnect-client"}) {"sqlite" (xt.db.system.backend-sqlite/provider) "supabase" (xt.db.system.backend-supabase/provider)}))
                   (-> (runtime/sharedworker-connect-state client
                                                           {"primary" {"type" "memory" "defaults" {}}
                                                            "caching" {"type" "memory" "defaults" {}}}
@@ -202,7 +210,7 @@
 (fact "connects a client to a WebWorker kernel and initialises it"
 
   (notify/wait-on [:js 20000]
-    (var client (substrate/node-create {"id" "webworker-connect-client"}))
+    (var client (xt.db.node.kernel-base/set-backends (substrate/node-create {"id" "webworker-connect-client"}) {"sqlite" (xt.db.system.backend-sqlite/provider) "supabase" (xt.db.system.backend-supabase/provider)}))
     (-> (runtime/webworker-connect client
                                    {"primary" {"type" "memory" "defaults" {}}
                                     "caching" {"type" "memory" "defaults" {}}}
@@ -247,8 +255,8 @@
   (notify/wait-on [:js 30000]
     (var worker-url (browser-transport/blob-url (@! +sharedworker-script+)))
     (var source (-/sharedworker-source-from-url worker-url {"type" "module"}))
-    (var client-a (substrate/node-create {"id" "sharedworker-client-a"}))
-    (var client-b (substrate/node-create {"id" "sharedworker-client-b"}))
+    (var client-a (xt.db.node.kernel-base/set-backends (substrate/node-create {"id" "sharedworker-client-a"}) {"sqlite" (xt.db.system.backend-sqlite/provider) "supabase" (xt.db.system.backend-supabase/provider)}))
+    (var client-b (xt.db.node.kernel-base/set-backends (substrate/node-create {"id" "sharedworker-client-b"}) {"sqlite" (xt.db.system.backend-sqlite/provider) "supabase" (xt.db.system.backend-supabase/provider)}))
     (-> (runtime/sharedworker-connect client-a
                                       {"primary" {"type" "memory" "defaults" {}}
                                        "caching" {"type" "memory" "defaults" {}}}
@@ -305,7 +313,7 @@
                "addEventListener" (fn [event cb] (:= listener cb))
                "postMessage" (fn [data] nil)})
     (var shared {"port" port})
-    (var node (substrate/node-create {"id" "shared-kernel"}))
+    (var node (xt.db.node.kernel-base/set-backends (substrate/node-create {"id" "shared-kernel"}) {"sqlite" (xt.db.system.backend-sqlite/provider) "supabase" (xt.db.system.backend-supabase/provider)}))
     (runtime/sharedworker-init-kernel node "transport" "worker")
     ((. (!:G globalThis) ["onconnect"]) {"ports" [port]})
     (repl/notify {"started" port-started
@@ -321,7 +329,7 @@
     (:= (!:G addEventListener) (fn [event listener] (xt/x:arr-push listeners [event listener])))
     (:= (!:G removeEventListener) (fn [event listener] nil))
     (:= (!:G postMessage) (fn [data] (xt/x:arr-push posted data)))
-    (var node (substrate/node-create {"id" "web-kernel"}))
+    (var node (xt.db.node.kernel-base/set-backends (substrate/node-create {"id" "web-kernel"}) {"sqlite" (xt.db.system.backend-sqlite/provider) "supabase" (xt.db.system.backend-supabase/provider)}))
     (promise/x:promise-then
      (runtime/webworker-init-kernel node "transport" "web")
      (fn [conn]
@@ -339,7 +347,7 @@
     (:= (!:G parentPort)
         {"postMessage" (fn [data] (xt/x:arr-push posted data))
          "on" (fn [event listener] (:= on-handler listener))})
-    (var node (substrate/node-create {"id" "node-kernel"}))
+    (var node (xt.db.node.kernel-base/set-backends (substrate/node-create {"id" "node-kernel"}) {"sqlite" (xt.db.system.backend-sqlite/provider) "supabase" (xt.db.system.backend-supabase/provider)}))
     (promise/x:promise-then
      (runtime/nodeworker-init-kernel node "transport" "worker")
      (fn [conn]
@@ -351,7 +359,7 @@
 ^{:refer xt.db.node.runtime/nodeworker-init-string :added "4.1"}
 (fact "emits a script string for booting a Node.js worker kernel"
 
-  (let [script (runtime/nodeworker-init-string)]
+  (let [script (runtime/nodeworker-init-string nil '{"backends" {"sqlite" (xt.db.system.backend-sqlite/provider) "supabase" (xt.db.system.backend-supabase/provider)} "init_handlers" [xt.db.node.kernel-supabase/init-handlers]})]
     (and (string? script)
          (> (count script) 0)
          (str/includes? script "nodeworker")))
@@ -361,7 +369,7 @@
 (fact "connects a client to a worker kernel and initialises it"
 
   (notify/wait-on [:js 20000]
-    (var client (substrate/node-create {"id" "nodeworker-connect-client"}))
+    (var client (xt.db.node.kernel-base/set-backends (substrate/node-create {"id" "nodeworker-connect-client"}) {"sqlite" (xt.db.system.backend-sqlite/provider) "supabase" (xt.db.system.backend-supabase/provider)}))
     (var onmessage nil)
     (var worker
          {"postMessage" (fn [data]

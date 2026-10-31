@@ -24,7 +24,8 @@
 
 (l/script- :js
   {:runtime :basic
-   :require [[js.net.http-fetch :as js-fetch]
+   :require [[xt.db.system.backend-supabase :as backend-supabase]
+             [js.net.http-fetch :as js-fetch]
              [xt.net.http-fetch :as http-fetch]
              [xt.lang.common-repl :as repl]
              [xt.lang.spec-base :as xt]
@@ -55,7 +56,7 @@
 ^{:refer xt.db.system.impl-supabase-session/get-session :added "4.1"}
 (fact "get-session reads the session from impl state"
   (!.js
-   (var source (main/create-impl "supabase" {} nil nil))
+   (var source (main/create-impl "supabase" {} nil nil {"supabase" (xt.db.system.backend-supabase/provider)}))
    (session/set-session source {"email" "test@example.com"})
    (session/get-session source))
   => {"email" "test@example.com"})
@@ -63,7 +64,7 @@
 ^{:refer xt.db.system.impl-supabase-session/set-session :added "4.1"}
 (fact "set-session stores the session and syncs the bearer token"
   (!.js
-   (var source (main/create-impl "supabase" {} nil nil))
+   (var source (main/create-impl "supabase" {} nil nil {"supabase" (xt.db.system.backend-supabase/provider)}))
    {"returned" (session/set-session source {"refresh_token" "abc" "access_token" "token-123"})
     "stored" (xtd/get-in source ["state" "session"])
     "token" (xtd/get-in source ["client" "defaults" "token"])})
@@ -74,7 +75,7 @@
 ^{:refer xt.db.system.impl-supabase-session/refresh-session :added "4.1"}
 (fact "refresh-session returns nil when no refresh token is present"
   (notify/wait-on :js
-    (var source (main/create-impl "supabase" {} nil nil))
+    (var source (main/create-impl "supabase" {} nil nil {"supabase" (xt.db.system.backend-supabase/provider)}))
     (-> (session/refresh-session source)
         (promise/x:promise-then
          (fn [out]
@@ -84,9 +85,9 @@
 ^{:refer xt.db.system.impl-supabase-session/auto-refresh-interval :added "4.1"}
 (fact "auto-refresh-interval derives delay from expires_in or opts"
   (!.js
-   (var source (main/create-impl "supabase" {} nil nil))
+   (var source (main/create-impl "supabase" {} nil nil {"supabase" (xt.db.system.backend-supabase/provider)}))
    (session/set-session source {"expires_in" 120})
-   (var source-opts (main/create-impl "supabase" {} nil nil))
+   (var source-opts (main/create-impl "supabase" {} nil nil {"supabase" (xt.db.system.backend-supabase/provider)}))
    (xtd/set-in source-opts ["opts" "auto_refresh_interval"] 10000)
    (session/set-session source-opts {"expires_in" 120})
    [(session/auto-refresh-interval source)
@@ -96,14 +97,14 @@
 ^{:refer xt.db.system.impl-supabase-session/auto-refresh-fn :added "4.1"}
 (fact "auto-refresh-fn returns nil when no current id is set"
   (!.js
-   (var source (main/create-impl "supabase" {} nil nil))
+   (var source (main/create-impl "supabase" {} nil nil {"supabase" (xt.db.system.backend-supabase/provider)}))
    (session/auto-refresh-fn source 100 "new-id"))
   => nil)
 
 ^{:refer xt.db.system.impl-supabase-session/auto-refresh-stop :added "4.1"}
 (fact "auto-refresh-stop clears the current refresh id"
   (!.js
-   (var source (main/create-impl "supabase" {} nil nil))
+   (var source (main/create-impl "supabase" {} nil nil {"supabase" (xt.db.system.backend-supabase/provider)}))
    (xtd/set-in source ["state" "auto_refresh" "current"] "abc")
    (session/auto-refresh-stop source)
    (xtd/get-in source ["state" "auto_refresh" "current"]))
@@ -112,7 +113,7 @@
 ^{:refer xt.db.system.impl-supabase-session/auto-refresh-start :added "4.1"}
 (fact "auto-refresh-start sets and returns the current refresh id"
   (!.js
-   (var source (main/create-impl "supabase" {} nil nil))
+   (var source (main/create-impl "supabase" {} nil nil {"supabase" (xt.db.system.backend-supabase/provider)}))
    (session/set-session source {"refresh_token" "abc"})
    (xt/x:not-nil? (session/auto-refresh-start source {})))
   => true)

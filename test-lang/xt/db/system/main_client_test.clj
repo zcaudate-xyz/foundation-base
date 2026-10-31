@@ -24,7 +24,10 @@
 
 (l/script- :js
   {:runtime :basic
-   :require [[xt.lang.common-repl :as repl]
+   :require [[xt.db.system.backend-postgres :as backend-postgres]
+             [xt.db.system.backend-sqlite :as backend-sqlite]
+             [xt.db.system.backend-supabase :as backend-supabase]
+             [xt.lang.common-repl :as repl]
              [xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]
              [xt.net.http-fetch :as http-fetch]
@@ -39,17 +42,19 @@
   :teardown [(l/rt:stop)]})
 
 ^{:refer xt.db.system.main-client/create-client :added "4.1"}
-(fact "returns nil for unsupported client types"
+(fact "memory does not require a native client"
 
-  (!.js
-    (main-client/create-client "memory" {}))
+  (l/with:global-init
+    (!.js
+    (main-client/create-client "memory" {})))
   => nil)
 
 ^{:refer xt.db.system.main-client/create-client.sqlite :added "4.1"}
 (fact "creates a sqlite client"
   
-  (!.js
-    (main-client/create-client "sqlite" {"filename" ":memory:"}))
+  (l/with:global-init
+    (!.js
+    (main-client/create-client "sqlite" {"filename" ":memory:"} {"sqlite" (xt.db.system.backend-sqlite/provider)})))
   => {"::" "js.net.conn_sqlite/SqliteClient",
       "::/protocol-impls" {"xt.net.conn_sql/ISqlClient" {}},
       "::/protocols" ["xt.net.conn_sql/ISqlClient"],
@@ -59,9 +64,10 @@
 ^{:refer xt.db.system.main-client/create-client.postgres :added "4.1"}
 (fact "creates a postgres client"
 
-  (notify/wait-on :js
+  (l/with:global-init
+    (notify/wait-on :js
     (-> (main-client/create-client "postgres"
-                                   (@! (local-min/+config+ :db)))
+                                   (@! (local-min/+config+ :db)) {"postgres" (xt.db.system.backend-postgres/provider)})
         (conn-sql/connect {})
         (promise/x:promise-then
          (fn [client]
@@ -69,23 +75,24 @@
             (conn-sql/query-async client "SELECT 1;"))))
         (promise/x:promise-then
          (fn [out]
-           (repl/notify out)))))
+           (repl/notify out))))))
   => 1)
 
 ^{:refer xt.db.system.main-client/create-client.supabase :added "4.1"}
 (fact "creates a live supabase client"
 
-  (notify/wait-on :js
+  (l/with:global-init
+    (notify/wait-on :js
     (-> (main-client/create-client
          "supabase"
          {"host" "127.0.0.1"
           "port" (@! (-> local-min/+config+ :api :port))
           "secured" false
           "basepath" ""
-          "apikey" (@! (-> local-min/+config+ :api :anon-key))})
+          "apikey" (@! (-> local-min/+config+ :api :anon-key))} {"supabase" (xt.db.system.backend-supabase/provider)})
         (http-fetch/request-http (addon/cmd-health {}))
         (promise/x:promise-then
          (fn [out]
            (repl/notify [(xt/x:get-key out "status")
-                         (xt/x:get-key (xt/x:get-key out "body") "name")])))))
+                         (xt/x:get-key (xt/x:get-key out "body") "name")]))))))
   => [200 "GoTrue"])

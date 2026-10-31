@@ -28,6 +28,9 @@
   (process-add-event [impl data])
   (process-remove-event [impl data]))
 
+(defprotocol.xt ISourceInit
+  (init-db [impl]))
+
 (defprotocol.xt ISourceLifecycle
   (stop-db [impl]))
 

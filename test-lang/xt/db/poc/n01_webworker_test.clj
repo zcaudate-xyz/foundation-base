@@ -26,7 +26,8 @@
 
 (l/script- :js
   {:runtime :basic
-   :require [[xt.lang.spec-base :as xt]
+   :require [[xt.db.system.backend-supabase :as backend-supabase]
+             [xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]
              [xt.lang.common-repl :as repl]
              [xt.lang.spec-promise :as promise]
@@ -100,7 +101,7 @@
                           "supabase"
                           (@! local-min/+config-supabase-anon+)
                           schema
-                          lookup))
+                          lookup {"supabase" (xt.db.system.backend-supabase/provider)}))
        (var caching-impl (xt.db.system.main/create-impl
                           "memory"
                           {}

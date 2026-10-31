@@ -2,7 +2,8 @@
   (:require [lang.core :as l]))
 
 (l/script :xtalk
-  {:require [[xt.lang.spec-base :as xt]
+  {:require [[xt.db.system.backend-supabase :as backend-supabase]
+             [xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]
              [xt.lang.common-data :as xtd]
              [xt.substrate :as substrate]
@@ -166,7 +167,7 @@
   [client-defaults service-id page-args]
   (:= service-id (or service-id -/DEFAULT_SERVICE_ID))
   (var node (substrate/node-create {}))
-  (var impl (db-main/create-impl "supabase" client-defaults nil nil))
+  (var impl (db-main/create-impl "supabase" client-defaults nil nil {"supabase" (xt.db.system.backend-supabase/provider)}))
   (substrate/set-service node service-id impl)
   (kernel-supabase/init-handlers node)
   (-/attach-auth-profile-models node service-id page-args)

@@ -1,0 +1,19 @@
+services:
+  bridge:
+    build:
+      context: ../../src-js/neon-bridge
+      dockerfile: Dockerfile.dev
+    env_file:
+      - .local/${NEON_ENV:-min}.bridge.env
+    environment:
+      HOST: 0.0.0.0
+      PORT: 8787
+    ports:
+      - "127.0.0.1:${NEON_BRIDGE_PORT:-18787}:8787"
+    init: true
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:8787/live').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 12

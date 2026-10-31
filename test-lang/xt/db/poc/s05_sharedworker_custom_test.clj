@@ -27,7 +27,11 @@
 
 (l/script- :js
   {:runtime :chromedriver.instance
-   :require [[xt.lang.spec-base :as xt]
+   :require [[xt.db.system.backend-sqlite]
+             [xt.db.system.backend-supabase]
+             [xt.db.node.kernel-base]
+             [xt.db.node.kernel-supabase]
+             [xt.lang.spec-base :as xt]
              [xt.lang.common-repl :as repl]
              [xt.lang.spec-promise :as promise]
              [xt.db.node.runtime :as runtime]
@@ -53,7 +57,7 @@
 (fact "shared worker auto-connect initialises the kernel on the client"
 
   (notify/wait-on [:js 5000]
-    (var client (substrate/node-create {"id" "db-model-client"}))
+    (var client (xt.db.node.kernel-base/set-backends (substrate/node-create {"id" "db-model-client"}) {"sqlite" (xt.db.system.backend-sqlite/provider) "supabase" (xt.db.system.backend-supabase/provider)}))
     (-> (runtime/sharedworker-connect client
                                       {"primary" {"type" "supabase"
                                                   "defaults" (@! local-min/+config-supabase-anon+)}

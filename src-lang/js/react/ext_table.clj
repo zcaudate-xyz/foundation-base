@@ -42,7 +42,7 @@
       (:= node (substrate/node-create {}))
       (xt/x:set-key context "node" node))
     ;; init-server installs @xt.db/rpc-call and the other node handlers.
-    (runtime/init-server node)
+    (runtime/init-server node (xt/x:get-key runtime-config "local" {}))
     ;; kernel-init creates the configured Supabase and cache services.
     (return
      (client-base/kernel-init

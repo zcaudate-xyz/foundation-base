@@ -1,0 +1,22 @@
+{
+  "name": "@xtalk/neon-bridge",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.mjs",
+    "start": "node example.mjs"
+  },
+  "dependencies": {
+    "@neon/neon-js": "0.10.2",
+    "@neon/realtime": "0.1.2",
+    "pg": "8.20.0",
+    "ws": "8.22.0"
+  },
+  "devDependencies": {
+    "@neon/config": "1.10.0"
+  }
+}

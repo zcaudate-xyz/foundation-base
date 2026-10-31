@@ -34,7 +34,11 @@
 
 (l/script- :js
   {:runtime :chromedriver.instance
-   :require [[xt.lang.spec-base :as xt]
+   :require [[xt.db.system.backend-sqlite]
+             [xt.db.system.backend-supabase]
+             [xt.db.node.kernel-base]
+             [xt.db.node.kernel-supabase]
+             [xt.lang.spec-base :as xt]
              [xt.lang.common-repl :as repl]
              [xt.lang.common-data :as xtd]
              [xt.lang.spec-promise :as promise]
@@ -106,7 +110,7 @@
 (fact "dataview model with select args filters currencies by type"
 
   (notify/wait-on [:js 15000]
-    (var client (substrate/node-create {}))
+    (var client (xt.db.node.kernel-base/set-backends (substrate/node-create {}) {"sqlite" (xt.db.system.backend-sqlite/provider) "supabase" (xt.db.system.backend-supabase/provider)}))
     (-> (-/connect-kernel-worker client)
         (promise/x:promise-then
          (fn [_]
@@ -173,7 +177,7 @@
 (fact "dataview model with select args and return args returns annotated currencies"
 
   (notify/wait-on [:js 15000]
-    (var client (substrate/node-create {}))
+    (var client (xt.db.node.kernel-base/set-backends (substrate/node-create {}) {"sqlite" (xt.db.system.backend-sqlite/provider) "supabase" (xt.db.system.backend-supabase/provider)}))
     (-> (-/connect-kernel-worker client)
         (promise/x:promise-then
          (fn [_]
@@ -242,7 +246,7 @@
 (fact "dataview model with return-id and return args returns a single annotated currency"
 
   (notify/wait-on [:js 15000]
-    (var client (substrate/node-create {}))
+    (var client (xt.db.node.kernel-base/set-backends (substrate/node-create {}) {"sqlite" (xt.db.system.backend-sqlite/provider) "supabase" (xt.db.system.backend-supabase/provider)}))
     (-> (-/connect-kernel-worker client)
         (promise/x:promise-then
          (fn [_]
@@ -302,7 +306,7 @@
 (fact "dataview model with select args returns wallet, assets and currencies"
 
   (notify/wait-on [:js 15000]
-    (var client (substrate/node-create {}))
+    (var client (xt.db.node.kernel-base/set-backends (substrate/node-create {}) {"sqlite" (xt.db.system.backend-sqlite/provider) "supabase" (xt.db.system.backend-supabase/provider)}))
     (-> (-/connect-kernel-worker client)
         (promise/x:promise-then
          (fn [_]
@@ -377,7 +381,7 @@
 (fact "pull model returns nested user profile, wallet, assets and currencies"
 
   (notify/wait-on [:js 15000]
-    (var client (substrate/node-create {}))
+    (var client (xt.db.node.kernel-base/set-backends (substrate/node-create {}) {"sqlite" (xt.db.system.backend-sqlite/provider) "supabase" (xt.db.system.backend-supabase/provider)}))
     (-> (-/connect-kernel-worker client)
         (promise/x:promise-then
          (fn [_]

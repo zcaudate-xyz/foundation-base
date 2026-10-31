@@ -13,13 +13,14 @@
     (.getValue this)))
 
 (defn create-pool
-  [{:keys [host port user pass dbname]
+  [{:keys [host port user pass dbname sslmode]
     :as m}]
   (let [ds (doto (PGConnectionPoolDataSource.)
              (.setServerName (or host "localhost"))
              (.setPortNumber (or port 5432))
              (cond-> dbname (.setDatabaseName dbname)))
         ds (cond-> ds
+             sslmode (doto (.setSslMode sslmode))
              user (doto (.setUser user))
              pass (doto (.setPassword pass)))]
     (.getPooledConnection ds)))

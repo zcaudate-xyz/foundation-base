@@ -24,7 +24,10 @@
 
 (l/script- :js
   {:runtime :basic
-   :require [[xt.lang.common-data :as xtd]
+   :require [[xt.db.system.backend-postgres :as backend-postgres]
+             [xt.db.system.backend-sqlite :as backend-sqlite]
+             [xt.db.system.backend-supabase :as backend-supabase]
+             [xt.lang.common-data :as xtd]
              [xt.lang.common-repl :as repl]
              [xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]
@@ -47,27 +50,31 @@
 ^{:refer xt.db.system.main/create-impl :added "4.1"}
 (fact "creates impls for local and live backends"
 
-  [(!.js (xtd/get-in (main/create-impl "memory" {} -/Schema -/SchemaLookup)
-                     ["::"]))
-   (!.js (xtd/get-in (main/create-impl "sqlite"
+  [(l/with:global-init
+    (!.js (xtd/get-in (main/create-impl "memory" {} -/Schema -/SchemaLookup)
+                     ["::"])))
+   (l/with:global-init
+    (!.js (xtd/get-in (main/create-impl "sqlite"
                                        {"filename" ":memory:"}
                                        -/Schema
-                                       -/SchemaLookup)
-                     ["::"]))
-   (!.js (xtd/get-in (main/create-impl "postgres"
+                                       -/SchemaLookup {"sqlite" (xt.db.system.backend-sqlite/provider)})
+                     ["::"])))
+   (l/with:global-init
+    (!.js (xtd/get-in (main/create-impl "postgres"
                                        (@! (local-min/+config+ :db))
                                        -/Schema
-                                       -/SchemaLookup)
-                     ["::"]))
-   (!.js (xtd/get-in (main/create-impl "supabase"
+                                       -/SchemaLookup {"postgres" (xt.db.system.backend-postgres/provider)})
+                     ["::"])))
+   (l/with:global-init
+    (!.js (xtd/get-in (main/create-impl "supabase"
                                        {"host" "127.0.0.1"
                                         "port" (@! (-> local-min/+config+ :api :port))
                                         "secured" false
                                         "basepath" ""
                                         "apikey" (@! (-> local-min/+config+ :api :service-key))}
                                        -/Schema
-                                       -/SchemaLookup)
-                     ["::"]))]
+                                       -/SchemaLookup {"supabase" (xt.db.system.backend-supabase/provider)})
+                     ["::"])))]
   => ["xt.db.system.impl_memory/ImplMemory"
       "xt.db.system.impl_sqlite/ImplSqlite"
       "xt.db.system.impl_postgres/ImplPostgres"
@@ -76,27 +83,30 @@
 ^{:refer xt.db.system.main/create-impl-init :added "4.1"}
 (fact "initialises postgres impls and leaves the wrapper output usable"
 
-  (notify/wait-on :js
+  (l/with:global-init
+    (notify/wait-on :js
     (-> (main/create-impl
          "postgres"
          (@! (local-min/+config+ :db))
          -/Schema
-         -/SchemaLookup)
+         -/SchemaLookup {"postgres" (xt.db.system.backend-postgres/provider)})
         (main/create-impl-init)
         (promise/x:promise-then
          (fn [impl]
-           (repl/notify (xt/x:get-key impl "client"))))))
+           (repl/notify (xt/x:get-key impl "client")))))))
   => map?)
 
 ^{:refer xt.db.system.impl-common/pull :added "4.1"
   :setup [(l/rt:restart :js)]}
 (fact "pull reads from the local memory impl"
 
-  (!.js
-    (main/create-impl "sqlite" {} -/Schema -/SchemaLookup))
+  (l/with:global-init
+    (!.js
+    (main/create-impl "sqlite" {} -/Schema -/SchemaLookup {"sqlite" (xt.db.system.backend-sqlite/provider)})))
 
-  (notify/wait-on :js
-    (-> (main/create-impl "sqlite" {} -/Schema -/SchemaLookup)
+  (l/with:global-init
+    (notify/wait-on :js
+    (-> (main/create-impl "sqlite" {} -/Schema -/SchemaLookup {"sqlite" (xt.db.system.backend-sqlite/provider)})
         (main/create-impl-init)
         (promise/x:promise-then
          (fn [impl]
@@ -106,12 +116,13 @@
                                     {"id" "LOG-20" "message" "world"}])
            (repl/notify
             (impl-common/pull impl ["Log"]))
-           #_(repl/notify impl)))))
+           #_(repl/notify impl))))))
   => (contains [(contains {"id" "LOG-10" "message" "hello"})
                 (contains {"id" "LOG-20" "message" "world"})]
                :in-any-order)
   
-  (notify/wait-on :js
+  (l/with:global-init
+    (notify/wait-on :js
     (-> (main/create-impl "memory" {} -/Schema -/SchemaLookup)
         (main/create-impl-init)
         (promise/x:promise-then
@@ -121,7 +132,7 @@
                                    [{"id" "LOG-10" "message" "hello"}
                                     {"id" "LOG-20" "message" "world"}])
            (repl/notify
-            (impl-common/pull impl ["Log"]))))))
+            (impl-common/pull impl ["Log"])))))))
   => (contains [(contains {"id" "LOG-10" "message" "hello"})
                 (contains {"id" "LOG-20" "message" "world"})]
                :in-any-order))
@@ -132,11 +143,12 @@
           (scratch-v0/log-append "world")]}
 (fact "getting same semantics for supabase and postgres"
   
-  (notify/wait-on :js
+  (l/with:global-init
+    (notify/wait-on :js
     (-> (main/create-impl "postgres"
                           (@! (:db local-min/+config+))
                           -/Schema
-                          -/SchemaLookup)
+                          -/SchemaLookup {"postgres" (xt.db.system.backend-postgres/provider)})
         (main/create-impl-init)
         (promise/x:promise-then
          (fn [impl]
@@ -144,17 +156,18 @@
             (impl-common/pull-async impl ["Log"]))))
         (promise/x:promise-then
          (fn [out]
-           (repl/notify out)))))
+           (repl/notify out))))))
   => (contains
       [(contains {"message" "hello", "author_id" nil, "id" string?})
        (contains {"message" "world", "author_id" nil, "id" string?})]
       :in-any-order)
 
-  (notify/wait-on :js
+  (l/with:global-init
+    (notify/wait-on :js
     (-> (main/create-impl "supabase"
                           (@! local-min/+config-supabase-anon+)
                           -/Schema
-                          -/SchemaLookup)
+                          -/SchemaLookup {"supabase" (xt.db.system.backend-supabase/provider)})
         (main/create-impl-init)
         (promise/x:promise-then
          (fn [impl]
@@ -162,7 +175,7 @@
             (impl-common/pull-async impl ["Log"]))))
         (promise/x:promise-then
          (fn [out]
-           (repl/notify out)))))
+           (repl/notify out))))))
   => (contains
       [(contains {"message" "hello", "author_id" nil, "id" string?})
        (contains {"message" "world", "author_id" nil, "id" string?})]
@@ -173,11 +186,12 @@
 (fact "rpc-call-async reaches the live supabase rpc endpoint"
 
   ;; POSTGRES
-  (notify/wait-on :js
+  (l/with:global-init
+    (notify/wait-on :js
     (-> (main/create-impl "postgres"
                           (@! (:db local-min/+config+))
                           -/Schema
-                          -/SchemaLookup)
+                          -/SchemaLookup {"postgres" (xt.db.system.backend-postgres/provider)})
         (main/create-impl-init)
         (promise/x:promise-then
          (fn [impl]
@@ -190,14 +204,15 @@
                                         []))))
         (promise/x:promise-then
          (fn [out]
-           (repl/notify out)))))
+           (repl/notify out))))))
   => "pong"
 
   ;; SUPABASE
-  (notify/wait-on :js
+  (l/with:global-init
+    (notify/wait-on :js
     (-> (main/create-impl "supabase" (@! local-min/+config-supabase-anon+)
                           -/Schema
-                          -/SchemaLookup)
+                          -/SchemaLookup {"supabase" (xt.db.system.backend-supabase/provider)})
         (main/create-impl-init)
         (promise/x:promise-then
          (fn [impl]
@@ -210,13 +225,14 @@
                                         []))))
         (promise/x:promise-then
          (fn [out]
-           (repl/notify out)))))
+           (repl/notify out))))))
   => "pong")
 
 ^{:refer xt.db.system.impl-common/record-add :added "4.1"}
 (fact "record-add writes through the local memory impl"
 
-  (notify/wait-on :js
+  (l/with:global-init
+    (notify/wait-on :js
     (var impl (main/create-impl "memory" {} -/Schema -/SchemaLookup))
     (->  (main/create-impl-init impl)
          (promise/x:promise-then
@@ -229,12 +245,13 @@
          (promise/x:promise-then
           (fn [_]
             (repl/notify
-             (impl-common/pull impl ["Log"]))))))
+             (impl-common/pull impl ["Log"])))))))
   => [{"id" "00000000-0000-0000-0000-000000000000"
        "message" "delta"}]
   
-  (notify/wait-on :js
-    (var impl (main/create-impl "sqlite" {} -/Schema -/SchemaLookup))
+  (l/with:global-init
+    (notify/wait-on :js
+    (var impl (main/create-impl "sqlite" {} -/Schema -/SchemaLookup {"sqlite" (xt.db.system.backend-sqlite/provider)}))
     (->  (main/create-impl-init impl)
          (promise/x:promise-then
           (fn [impl]
@@ -246,7 +263,7 @@
          (promise/x:promise-then
           (fn [_]
             (repl/notify
-             (impl-common/pull impl ["Log"]))))))
+             (impl-common/pull impl ["Log"])))))))
   => [{"id" "00000000-0000-0000-0000-000000000000"
        "author_id" "00000000-0000-0000-0000-000000000000"
        "message" "delta"}])
@@ -254,7 +271,8 @@
 ^{:refer xt.db.system.impl-common/record-delete :added "4.1"}
 (fact "record-delete removes ids through the local memory impl"
 
-  (!.js
+  (l/with:global-init
+    (!.js
     (var impl (main/create-impl "memory" {} -/Schema -/SchemaLookup))
     (impl-common/record-add impl "Log" [{"id" "LOG-30" "message" "root"}])
     (impl-common/record-delete impl
@@ -262,14 +280,15 @@
                                ["LOG-30"])
     (xtd/get-in impl ["client"
                       "Log"
-                      "LOG-30"]))
+                      "LOG-30"])))
   => nil)
 
 
 ^{:refer xt.db.system.impl-common/process-add-event :added "4.1"}
 (fact "process-add-event merges nested data into the local memory impl"
 
-  (!.js
+  (l/with:global-init
+    (!.js
     (var impl (main/create-impl "memory" {} -/Schema -/SchemaLookup))
     (var out (impl-common/process-add-event impl {"Log" [{"id" "LOG-50" "message" "root"}]}))
     [(xt/x:len out)
@@ -278,19 +297,20 @@
                        "LOG-50"
                        "record"
                        "data"
-                       "message"])])
+                       "message"])]))
   => [0
       "root"])
 
 ^{:refer xt.db.system.impl-common/process-remove-event :added "4.1"}
 (fact "process-remove-event removes nested data in lookup order"
 
-  (!.js
+  (l/with:global-init
+    (!.js
     (var impl (main/create-impl "memory" {} -/Schema -/SchemaLookup))
     (impl-common/process-add-event impl {"Log" [{"id" "LOG-60" "message" "root"}]})
     [(impl-common/process-remove-event impl {"Log" [{"id" "LOG-60" "message" "root"}]})
      (xtd/get-in impl ["rows"
                        "Log"
-                       "LOG-60"])])
+                       "LOG-60"])]))
   => [["Log"]
       nil])

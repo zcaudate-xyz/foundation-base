@@ -25,7 +25,10 @@
 
 (l/script- :js
   {:runtime :basic
-   :require [[xt.lang.spec-base :as xt]
+   :require [[xt.db.system.backend-sqlite]
+             [xt.db.system.backend-supabase]
+             [xt.db.node.kernel-supabase]
+             [xt.lang.spec-base :as xt]
              [xt.lang.common-repl :as repl]
              [xt.lang.common-data :as xtd]
              [xt.lang.spec-promise :as promise]
@@ -52,7 +55,7 @@
 (fact "installs db/primary (supabase) and db/caching (sqlite) services on the node"
 
   (notify/wait-on :js
-    (var node (substrate/node-create {"id" "poc-node"}))
+    (var node (xt.db.node.kernel-base/set-backends (substrate/node-create {"id" "poc-node"}) {"sqlite" (xt.db.system.backend-sqlite/provider) "supabase" (xt.db.system.backend-supabase/provider)}))
     (-> (kernel-base/kernel-init-main
          node
          {"primary" {"type" "supabase"
@@ -92,7 +95,7 @@
 (fact "attaches db-model-service models to a node space"
 
   (notify/wait-on :js
-    (var node (substrate/node-create {"id" "poc-node"}))
+    (var node (xt.db.node.kernel-base/set-backends (substrate/node-create {"id" "poc-node"}) {"sqlite" (xt.db.system.backend-sqlite/provider) "supabase" (xt.db.system.backend-supabase/provider)}))
     (-> (kernel-base/kernel-init-main
          node
          {"primary" {"type" "supabase"
@@ -149,7 +152,7 @@
 (fact "remote handler pulls asynchronously from db/primary"
 
   (notify/wait-on :js
-    (var node (substrate/node-create {"id" "poc-node"}))
+    (var node (xt.db.node.kernel-base/set-backends (substrate/node-create {"id" "poc-node"}) {"sqlite" (xt.db.system.backend-sqlite/provider) "supabase" (xt.db.system.backend-supabase/provider)}))
     (-> (kernel-base/kernel-init-main
          node
          {"primary" {"type" "supabase"

@@ -1,7 +1,12 @@
 ^{:seedgen/skip true}
 (ns xt.db.node.client-base-browser-test
   (:use code.test)
-  (:require [lang.core :as l]
+  (:require [xt.db.system.backend-postgres]
+            [xt.db.system.backend-sqlite]
+            [xt.db.system.backend-supabase]
+            [xt.db.node.kernel-base]
+            [xt.db.node.kernel-supabase]
+            [lang.core :as l]
             [lang.runtime.chromedriver :as chromedriver]
             [xt.lang.common-notify :as notify]
             [scaffold.supabase.local-min :as local-min]
@@ -36,7 +41,11 @@
 
 (l/script- :js
   {:runtime :chromedriver.instance
-   :require [[xt.lang.spec-base :as xt]
+   :require [[xt.db.system.backend-postgres]
+             [xt.db.system.backend-sqlite]
+             [xt.db.system.backend-supabase]
+             [xt.db.node.kernel-supabase]
+             [xt.lang.spec-base :as xt]
              [xt.lang.common-repl :as repl]
              [xt.lang.common-data :as xtd]
              [xt.lang.spec-promise :as promise]
@@ -77,7 +86,7 @@
   (str "http://127.0.0.1:" (:http-port (l/default-notify)) "/"))
 
 (def ^:private +sharedworker-script+
-  (runtime/sharedworket-init-string))
+  (runtime/sharedworket-init-string nil '{"backends" {"postgres" (xt.db.system.backend-postgres/provider) "sqlite" (xt.db.system.backend-sqlite/provider) "supabase" (xt.db.system.backend-supabase/provider)} "init_handlers" [xt.db.node.kernel-supabase/init-handlers]}))
 
 (defn.js store-sharedworker-url
   "Creates a fresh blob URL for the SharedWorker kernel script and stores it
@@ -148,7 +157,7 @@
   (def sync-direct-result
     (chromedriver/with-tab (l/rt :js) +tab-a+
       (notify/wait-on [:js 20000]
-        (var node (substrate/node-create {"id" "sync-cached-direct"}))
+        (var node (xt.db.node.kernel-base/set-backends (substrate/node-create {"id" "sync-cached-direct"}) {"postgres" (xt.db.system.backend-postgres/provider) "sqlite" (xt.db.system.backend-sqlite/provider) "supabase" (xt.db.system.backend-supabase/provider)}))
         (kernel-base/init-handlers node)
         (-> (client/kernel-init node
                                 {"primary" (. -/CONFIG ["supabase"])
@@ -180,7 +189,7 @@
   (def sync-shared-result
     (chromedriver/with-tab (l/rt :js) +tab-b+
       (notify/wait-on [:js 20000]
-        (var node (substrate/node-create {"id" "sync-cached-shared"}))
+        (var node (xt.db.node.kernel-base/set-backends (substrate/node-create {"id" "sync-cached-shared"}) {"postgres" (xt.db.system.backend-postgres/provider) "sqlite" (xt.db.system.backend-sqlite/provider) "supabase" (xt.db.system.backend-supabase/provider)}))
         (-> (runtime/sharedworker-connect node
                                           {"primary" (. -/CONFIG ["supabase"])
                                            "caching" (. -/CONFIG ["memory"])}
@@ -242,7 +251,7 @@
   (def dataview-direct-result
     (chromedriver/with-tab (l/rt :js) +tab-a+
       (notify/wait-on [:js 30000]
-        (var node (substrate/node-create {"id" "dataview-attach-direct"}))
+        (var node (xt.db.node.kernel-base/set-backends (substrate/node-create {"id" "dataview-attach-direct"}) {"postgres" (xt.db.system.backend-postgres/provider) "sqlite" (xt.db.system.backend-sqlite/provider) "supabase" (xt.db.system.backend-supabase/provider)}))
         (kernel-base/init-handlers node)
         (-> (client/kernel-init node
                                 {"primary" (. -/CONFIG ["supabase"])
@@ -306,7 +315,7 @@
   (def dataview-shared-result
     (chromedriver/with-tab (l/rt :js) +tab-b+
       (notify/wait-on [:js 30000]
-        (var node (substrate/node-create {"id" "dataview-attach-shared"}))
+        (var node (xt.db.node.kernel-base/set-backends (substrate/node-create {"id" "dataview-attach-shared"}) {"postgres" (xt.db.system.backend-postgres/provider) "sqlite" (xt.db.system.backend-sqlite/provider) "supabase" (xt.db.system.backend-supabase/provider)}))
         (-> (runtime/sharedworker-connect node
                                           {"primary" (. -/CONFIG ["supabase"])
                                            "caching" (. -/CONFIG ["memory"])}
@@ -400,7 +409,7 @@
   (def pull-direct-result
     (chromedriver/with-tab (l/rt :js) +tab-a+
       (notify/wait-on [:js 30000]
-        (var node (substrate/node-create {"id" "pull-attach-direct"}))
+        (var node (xt.db.node.kernel-base/set-backends (substrate/node-create {"id" "pull-attach-direct"}) {"postgres" (xt.db.system.backend-postgres/provider) "sqlite" (xt.db.system.backend-sqlite/provider) "supabase" (xt.db.system.backend-supabase/provider)}))
         (kernel-base/init-handlers node)
         (-> (client/kernel-init node
                                 {"primary" (. -/CONFIG ["supabase"])
@@ -450,7 +459,7 @@
   (def pull-shared-result
     (chromedriver/with-tab (l/rt :js) +tab-b+
       (notify/wait-on [:js 30000]
-        (var node (substrate/node-create {"id" "pull-attach-shared"}))
+        (var node (xt.db.node.kernel-base/set-backends (substrate/node-create {"id" "pull-attach-shared"}) {"postgres" (xt.db.system.backend-postgres/provider) "sqlite" (xt.db.system.backend-sqlite/provider) "supabase" (xt.db.system.backend-supabase/provider)}))
         (-> (runtime/sharedworker-connect node
                                           {"primary" (. -/CONFIG ["supabase"])
                                            "caching" (. -/CONFIG ["memory"])}
@@ -523,7 +532,7 @@
 (fact "attaches a remote ping model before its separate SharedWorker call"
 
   (notify/wait-on [:js 30000]
-    (var node (substrate/node-create {"id" "rpc-sharedworker-sqlite"}))
+    (var node (xt.db.node.kernel-base/set-backends (substrate/node-create {"id" "rpc-sharedworker-sqlite"}) {"postgres" (xt.db.system.backend-postgres/provider) "sqlite" (xt.db.system.backend-sqlite/provider) "supabase" (xt.db.system.backend-supabase/provider)}))
     (var state nil)
     (var attachment nil)
     (var before nil)

@@ -65,12 +65,18 @@
         (xt/x:not-nil? (substrate/get-service node (xtd/get-in config ["primary"  "id"])))
         (xt/x:not-nil? (substrate/get-service node (xtd/get-in config ["caching"  "id"]))))))
 
+(defn.xt set-backends
+  "Installs a node-local provider map, never part of a transport payload."
+  [node backends]
+  (xtd/set-in node ["state" "db_backends"] (or backends {}))
+  (return node))
+
 (defn.xt kernel-setup-single
   "init-base-type installs a live impl on the node"
   {:added "4.1"}
   [node service-id type defaults schema lookup]
   (return
-   (-> (impl-main/create-impl type defaults schema lookup)
+   (-> (impl-main/create-impl type defaults schema lookup (xtd/get-in node ["state" "db_backends"]))
        (impl-main/create-impl-init)
        (promise/x:promise-then
         (fn [impl]
@@ -82,7 +88,7 @@
   {:added "4.1"}
   [node service-id]
   (var impl (substrate/get-service node service-id))
-  (when (protocol/protocol-implements impl "xt.db.system.impl_common/ISourceLifecycle")
+  (when (protocol/protocol-implements impl (xt/x:get-key impl-common/ISourceLifecycle "on" nil))
     (impl-common/stop-db impl))  
   (substrate/remove-service node service-id)
   (return node))

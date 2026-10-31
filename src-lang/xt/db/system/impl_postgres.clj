@@ -37,8 +37,25 @@
   (conn-sql/disconnect client)
   (return nil))
 
+(defn.xt impl-postgres-init
+  "connects the thin postgres impl through a runtime sql driver"
+  {:added "4.1"}
+  [impl]
+  (var #{client
+         schema
+         lookup
+         opts} impl)
+  (return
+   (-> (conn-sql/connect client {})
+       (promise/x:promise-then
+        (fn [client]
+          (return impl))))))
+
 (defimpl.xt ImplPostgres
   [client schema lookup listeners opts metadata]
+
+  impl-common/ISourceInit
+  {impl-common/init-db -/impl-postgres-init}
 
   impl-common/ISourceRemote
   {impl-common/pull-async     -/pull-async
@@ -56,17 +73,3 @@
   [client schema lookup]
   (return
    (-/ImplPostgres client schema lookup {} (sql-util/postgres-opts lookup) {})))
-
-(defn.xt impl-postgres-init
-  "connects the thin postgres impl through a runtime sql driver"
-  {:added "4.1"}
-  [impl]
-  (var #{client
-         schema
-         lookup
-         opts} impl)
-  (return
-   (-> (conn-sql/connect client)
-       (promise/x:promise-then
-        (fn [client]
-          (return impl))))))

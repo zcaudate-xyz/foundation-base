@@ -33,7 +33,11 @@
 
 (l/script- :js
   {:runtime :chromedriver.instance
-   :require [[xt.lang.spec-base :as xt]
+   :require [[xt.db.system.backend-sqlite]
+             [xt.db.system.backend-supabase]
+             [xt.db.node.kernel-base]
+             [xt.db.node.kernel-supabase]
+             [xt.lang.spec-base :as xt]
              [xt.lang.common-repl :as repl]
              [xt.lang.common-data :as xtd]
              [xt.lang.spec-promise :as promise]
@@ -76,7 +80,7 @@
   "connects a client to the shared worker and invokes callback"
   {:added "4.1"}
   [callback]
-  (var client (substrate/node-create {"id" "db-model-client"}))
+  (var client (xt.db.node.kernel-base/set-backends (substrate/node-create {"id" "db-model-client"}) {"sqlite" (xt.db.system.backend-sqlite/provider) "supabase" (xt.db.system.backend-supabase/provider)}))
   (return
    (promise/x:promise-then
     (-/connect-kernel-worker client)

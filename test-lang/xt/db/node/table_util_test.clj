@@ -27,7 +27,9 @@
 
 (l/script- :js
   {:runtime :basic
-   :require [[xt.lang.spec-base :as xt]
+   :require [[xt.db.system.backend-supabase]
+             [xt.db.node.kernel-supabase]
+             [xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]
              [xt.lang.common-repl :as repl]
              [xt.substrate :as substrate]
@@ -42,7 +44,7 @@
 
 (defn.js node-init-supabase
   [node]
-  (:= node (or node (substrate/node-create {})))
+  (:= node (or node (xt.db.node.kernel-base/set-backends (substrate/node-create {}) {"supabase" (xt.db.system.backend-supabase/provider)})))
   (kernel/init-handlers node)
   (return
    (kernel/kernel-setup-main
@@ -82,7 +84,7 @@
             {:track {}})]}
 (fact "uses a live Supabase primary and its paired cache"
   (notify/wait-on :js
-    (var node (substrate/node-create {}))
+    (var node (xt.db.node.kernel-base/set-backends (substrate/node-create {}) {"supabase" (xt.db.system.backend-supabase/provider)}))
     (var context {"node" node "primary-id" "db/primary"})
     (var impl (-/table-impl))
     (-> (-/node-init-supabase node)
@@ -138,7 +140,7 @@
 ^{:refer xt.db.node.table-util/request-data :added "4.1"}
 (fact "uses all native node client request paths"
   (notify/wait-on :js
-    (var node (substrate/node-create {}))
+    (var node (xt.db.node.kernel-base/set-backends (substrate/node-create {}) {"supabase" (xt.db.system.backend-supabase/provider)}))
     (var context {"node" node
                   "primary-id" "db/test"
                   "opts" {"transport_id" "t1"}})
@@ -275,7 +277,7 @@
 ^{:refer xt.db.node.table-util/table-ids :added "4.1"}
 (fact "extracts ids from a node pull result"
   (notify/wait-on :js
-    (var node (substrate/node-create {}))
+    (var node (xt.db.node.kernel-base/set-backends (substrate/node-create {}) {"supabase" (xt.db.system.backend-supabase/provider)}))
     (substrate/register-handler
      node
      "@xt.db/pull-call"
@@ -291,7 +293,7 @@
 ^{:refer xt.db.node.table-util/table-ids-updated :added "4.1"}
 (fact "extracts ids and update values from a node pull result"
   (notify/wait-on :js
-    (var node (substrate/node-create {}))
+    (var node (xt.db.node.kernel-base/set-backends (substrate/node-create {}) {"supabase" (xt.db.system.backend-supabase/provider)}))
     (var impl
          {"base"
           {"list"
@@ -315,7 +317,7 @@
 ^{:refer xt.db.node.table-util/table-ids-data :added "4.1"}
 (fact "adds id constraints before issuing a data request"
   (notify/wait-on :js
-    (var node (substrate/node-create {}))
+    (var node (xt.db.node.kernel-base/set-backends (substrate/node-create {}) {"supabase" (xt.db.system.backend-supabase/provider)}))
     (substrate/register-handler
      node
      "@xt.db/pull-call"
@@ -339,7 +341,7 @@
 ^{:refer xt.db.node.table-util/sync-unknown-ids :added "4.1"}
 (fact "finds ids present in the primary but not the cache"
   (notify/wait-on :js
-    (var node (substrate/node-create {}))
+    (var node (xt.db.node.kernel-base/set-backends (substrate/node-create {}) {"supabase" (xt.db.system.backend-supabase/provider)}))
     (substrate/register-handler
      node
      "@xt.db/pull-cached"
@@ -361,7 +363,7 @@
 ^{:refer xt.db.node.table-util/sync-outdated-ids :added "4.1"}
 (fact "finds primary ids whose update values differ from the cache"
   (notify/wait-on :js
-    (var node (substrate/node-create {}))
+    (var node (xt.db.node.kernel-base/set-backends (substrate/node-create {}) {"supabase" (xt.db.system.backend-supabase/provider)}))
     (var impl
          {"base"
           {"list"
@@ -392,7 +394,7 @@
 ^{:refer xt.db.node.table-util/sync-unknown :added "4.1"}
 (fact "pulls records for ids that are missing from the cache"
   (notify/wait-on :js
-    (var node (substrate/node-create {}))
+    (var node (xt.db.node.kernel-base/set-backends (substrate/node-create {}) {"supabase" (xt.db.system.backend-supabase/provider)}))
     (substrate/register-handler
      node
      "@xt.db/pull-cached"
@@ -423,7 +425,7 @@
 ^{:refer xt.db.node.table-util/sync-outdated :added "4.1"}
 (fact "returns no records when cached update values are current"
   (notify/wait-on :js
-    (var node (substrate/node-create {}))
+    (var node (xt.db.node.kernel-base/set-backends (substrate/node-create {}) {"supabase" (xt.db.system.backend-supabase/provider)}))
     (var impl
          {"base"
           {"list"
@@ -458,7 +460,7 @@
 ^{:refer xt.db.node.table-util/action-fn :added "4.1"}
 (fact "creates an action backed by a node RPC handler"
   (notify/wait-on :js
-    (var node (substrate/node-create {}))
+    (var node (xt.db.node.kernel-base/set-backends (substrate/node-create {}) {"supabase" (xt.db.system.backend-supabase/provider)}))
     (substrate/register-handler
      node
      "@xt.db/rpc-call"
@@ -482,7 +484,7 @@
 ^{:refer xt.db.node.table-util/make-actions :added "4.1"}
 (fact "creates callable actions for an implementation"
   (notify/wait-on :js
-    (var node (substrate/node-create {}))
+    (var node (xt.db.node.kernel-base/set-backends (substrate/node-create {}) {"supabase" (xt.db.system.backend-supabase/provider)}))
     (substrate/register-handler
      node
      "@xt.db/rpc-call"

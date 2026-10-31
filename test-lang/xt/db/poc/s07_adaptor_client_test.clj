@@ -26,7 +26,10 @@
 
 (l/script- :js
   {:runtime :chromedriver.instance
-   :require [[xt.lang.spec-base :as xt]
+   :require [[xt.db.system.backend-sqlite]
+             [xt.db.system.backend-supabase]
+             [xt.db.node.kernel-supabase]
+             [xt.lang.spec-base :as xt]
              [xt.lang.common-repl :as repl]
              [xt.lang.common-data :as xtd]
              [xt.lang.spec-promise :as promise]
@@ -84,7 +87,7 @@
 (fact "client can init adaptor, attach a remote tree-view model, and read postgres data"
   
   (notify/wait-on [:js 5000]
-    (var client (substrate/node-create {}))
+    (var client (xt.db.node.kernel-base/set-backends (substrate/node-create {}) {"sqlite" (xt.db.system.backend-sqlite/provider) "supabase" (xt.db.system.backend-supabase/provider)}))
     (-> (-/connect-kernel-worker client)
         (promise/x:promise-then
          (fn [_]
@@ -131,7 +134,7 @@
 
 
   (notify/wait-on [:js 5000]
-    (var client (substrate/node-create {}))
+    (var client (xt.db.node.kernel-base/set-backends (substrate/node-create {}) {"sqlite" (xt.db.system.backend-sqlite/provider) "supabase" (xt.db.system.backend-supabase/provider)}))
     (-> (-/connect-kernel-worker client)
         (promise/x:promise-then
          (fn [_]

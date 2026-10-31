@@ -129,31 +129,6 @@
 ;;
 
 
-(defimpl.xt ImplSqlite
-  [client schema lookup listeners opts metadata]
-
-  impl-common/ISourceLocal
-  {impl-common/clear-db             -/clear-db
-   impl-common/pull                 -/pull
-   impl-common/record-add           -/record-add
-   impl-common/record-delete        -/record-delete
-   impl-common/process-add-event    -/process-add-event
-   impl-common/process-remove-event -/process-remove-event}
-  
-  impl-common/ISourceRemote
-  {impl-common/pull-async     -/pull-async
-   impl-common/rpc-call-async -/rpc-call-async}
-
-  impl-common/ISourceListener
-  {impl-common/add-db-listener     impl-common/add-db-listener-default
-   impl-common/remove-db-listener  impl-common/remove-db-listener-default
-   impl-common/get-db-listener     impl-common/get-db-listener-default})
-
-(defn.xt impl-sqlite
-  [client schema lookup]
-  (return
-   (-/ImplSqlite client schema lookup {} (sql-util/sqlite-opts lookup) {})))
-
 (defn.xt impl-sqlite-init
   [impl]
   (var #{client
@@ -170,3 +145,31 @@
           (when (< 0 (xt/x:str-len sql))
             (conn-sql/query client sql))
           (return impl))))))
+
+(defimpl.xt ImplSqlite
+  [client schema lookup listeners opts metadata]
+
+  impl-common/ISourceLocal
+  {impl-common/clear-db             -/clear-db
+   impl-common/pull                 -/pull
+   impl-common/record-add           -/record-add
+   impl-common/record-delete        -/record-delete
+   impl-common/process-add-event    -/process-add-event
+   impl-common/process-remove-event -/process-remove-event}
+  
+  impl-common/ISourceInit
+  {impl-common/init-db -/impl-sqlite-init}
+
+  impl-common/ISourceRemote
+  {impl-common/pull-async     -/pull-async
+   impl-common/rpc-call-async -/rpc-call-async}
+
+  impl-common/ISourceListener
+  {impl-common/add-db-listener     impl-common/add-db-listener-default
+   impl-common/remove-db-listener  impl-common/remove-db-listener-default
+   impl-common/get-db-listener     impl-common/get-db-listener-default})
+
+(defn.xt impl-sqlite
+  [client schema lookup]
+  (return
+   (-/ImplSqlite client schema lookup {} (sql-util/sqlite-opts lookup) {})))

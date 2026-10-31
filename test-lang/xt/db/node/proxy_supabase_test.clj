@@ -26,7 +26,8 @@
 
 (l/script- :js
   {:runtime :basic
-   :require [[xt.lang.common-data :as xtd]
+   :require [[xt.db.system.backend-supabase :as backend-supabase]
+             [xt.lang.common-data :as xtd]
              [xt.lang.common-tree :as tree]
              [xt.lang.common-repl :as repl]
              [xt.lang.common-protocol :as proto]
@@ -70,7 +71,7 @@
              "supabase"
              (xt/x:get-key client "defaults")
              nil
-             nil))
+             nil {"supabase" (xt.db.system.backend-supabase/provider)}))
   (session/set-session impl nil)
   (substrate/set-service node "auth/supabase" impl)
   (return node))

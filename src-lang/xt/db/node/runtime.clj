@@ -11,9 +11,7 @@
                      [xt.db.node.client-base :as client-base]
                      [xt.db.node.proxy-base :as proxy-base]
                      [xt.db.node.proxy-util :as proxy-util]
-                     [xt.db.node.proxy-supabase :as proxy-supabase]
-                     [xt.db.node.kernel-base :as kernel-base]
-                     [xt.db.node.kernel-supabase :as kernel-supabase]]})
+                     [xt.db.node.kernel-base :as kernel-base]]})
 
 (def.xt DEFAULT_TRANSPORT
   "xt.db.default.transport")
@@ -22,16 +20,23 @@
   "xt.db.default.worker")
 
 (defn.xt init-server
-  [node]
+  [node (:.. optional)]
+  (var options (:? (> (xt/x:len optional) 0) (xt/x:first optional) nil))
+  (:= options (or options {}))
+  (when (xt/x:has-key? options "backends")
+    (kernel-base/set-backends node (xt/x:get-key options "backends" nil)))
   (page-proxy/install node)
   (kernel-base/init-handlers node)
-  (kernel-supabase/init-handlers node))
+  (xt/for:array [install (xt/x:get-key options "init_handlers" [])] (install node))
+  (return node))
 
 (defn.xt init-server-proxy
-  [node]
+  [node (:.. optional)]
+  (var options (:? (> (xt/x:len optional) 0) (xt/x:first optional) nil))
   (page-proxy/install node)
   (proxy-base/init-proxy-handlers node)
-  (proxy-supabase/init-proxy-handlers node))
+  (xt/for:array [install (xt/x:get-key (or options {}) "init_proxy_handlers" [])] (install node))
+  (return node))
 
 
 ;;
@@ -39,8 +44,9 @@
 ;;
 
 (defn.xt sharedworker-init-kernel
-  [node transport-id worker-id]
-  (-/init-server node)
+  [node transport-id worker-id (:.. optional)]
+  (var options (:? (> (xt/x:len optional) 0) (xt/x:first optional) nil))
+  (-/init-server node options)
   (:= (. globalThis ["onconnect"])
       (fn [e]
         (var port (. e ["ports"] [0]))
@@ -62,21 +68,18 @@
                                  -/DEFAULT_WORKER)}})))))
 
 (defn sharedworket-init-string
-  [& [override]]
+  "Emits a worker with explicitly supplied local runtime options."
+  [& [override options-form]]
   (l/emit-script
-   '(do
-      (var node (xt.substrate/node-create {"id" xt.db.node.runtime/DEFAULT_WORKER}))
-      (xt.db.node.runtime/sharedworker-init-kernel node))
-   {:lang :js
-    :layout :full
-    :emit {:override (or override
-                         {"@sqlite.org/sqlite-wasm" "https://esm.sh/@sqlite.org/sqlite-wasm@3.51.2-build8"
-                          "pg" "data:text/javascript,export default {Client: function() {}}"})}}))
+   (list 'do
+         '(var node (xt.substrate/node-create {"id" xt.db.node.runtime/DEFAULT_WORKER}))
+         (list 'xt.db.node.runtime/sharedworker-init-kernel 'node nil nil (or options-form {})))
+   {:lang :js :layout :full :emit {:override (or override {})}}))
 
 (defn sharedworker-init-string
   "emits a standalone SharedWorker kernel script"
-  [& [override]]
-  (sharedworket-init-string override))
+  [& [override options-form]]
+  (sharedworket-init-string override options-form))
 
 (def.xt DEFAULT_SHAREDWORKER_SCRIPT
   (@! (sharedworker-init-string)))
@@ -84,8 +87,9 @@
 (defn.xt ^{:public true}
   sharedworker-connect-transport
   "connects a client to a SharedWorker without initialising the db kernel"
-  [client source transport-id]
-  (-/init-server-proxy client)
+  [client source transport-id (:.. optional)]
+  (var options (:? (> (xt/x:len optional) 0) (xt/x:first optional) nil))
+  (-/init-server-proxy client options)
   (return
    (-> (browser-transport/connect-sharedworker
         client
@@ -102,10 +106,11 @@
 
 (defn.xt sharedworker-connect-state
   "connects a client to a SharedWorker and returns its connection state"
-  [client config schema lookup source transport-id]
+  [client config schema lookup source transport-id (:.. optional)]
+  (var options (:? (> (xt/x:len optional) 0) (xt/x:first optional) nil))
   (var connection nil)
   (return
-   (-> (-/sharedworker-connect-transport client source transport-id)
+   (-> (-/sharedworker-connect-transport client source transport-id options)
        (promise/x:promise-then
         (fn [state]
           (:= connection (. state ["connection"]))
@@ -121,14 +126,16 @@
   (return (browser-transport/disconnect (. state ["connection"]))))
 
 (defn.xt sharedworker-connect
-  [client config schema lookup source transport-id]
+  [client config schema lookup source transport-id (:.. optional)]
+  (var options (:? (> (xt/x:len optional) 0) (xt/x:first optional) nil))
   (return
    (-> (-/sharedworker-connect-state client
                                      config
                                      schema
                                      lookup
                                      source
-                                     transport-id)
+                                     transport-id
+                                     options)
        (promise/x:promise-then
         (fn [state]
           (return (. state ["init"])))))))
@@ -139,8 +146,9 @@
 ;;
 
 (defn.xt webworker-init-kernel
-  [node transport-id worker-id]
-  (-/init-server node)
+  [node transport-id worker-id (:.. optional)]
+  (var options (:? (> (xt/x:len optional) 0) (xt/x:first optional) nil))
+  (-/init-server node options)
   (return
    (browser-transport/boot-self
     node
@@ -154,23 +162,21 @@
                            -/DEFAULT_WORKER)}})))
 
 (defn webworker-init-string
-  [& [override]]
+  "Emits a worker with explicitly supplied local runtime options."
+  [& [override options-form]]
   (l/emit-script
-   '(do
-      (var node (xt.substrate/node-create {"id" xt.db.node.runtime/DEFAULT_WORKER}))
-      (xt.db.node.runtime/webworker-init-kernel node))
-   {:lang :js
-    :layout :full
-    :emit {:override (or override
-                         {"@sqlite.org/sqlite-wasm" "https://esm.sh/@sqlite.org/sqlite-wasm@3.51.2-build8"
-                          "pg" "data:text/javascript,export default {Client: function() {}}"})}}))
+   (list 'do
+         '(var node (xt.substrate/node-create {"id" xt.db.node.runtime/DEFAULT_WORKER}))
+         (list 'xt.db.node.runtime/webworker-init-kernel 'node nil nil (or options-form {})))
+   {:lang :js :layout :full :emit {:override (or override {})}}))
 
 (def.xt DEFAULT_WEBWORKER_SCRIPT
   (@! (webworker-init-string)))
 
 (defn.xt webworker-connect
-  [client config schema lookup source transport-id]
-  (-/init-server-proxy client)
+  [client config schema lookup source transport-id (:.. optional)]
+  (var options (:? (> (xt/x:len optional) 0) (xt/x:first optional) nil))
+  (-/init-server-proxy client options)
   (return
    (-> (browser-transport/connect-worker
         client
@@ -192,8 +198,9 @@
 ;;
 
 (defn.xt nodeworker-init-kernel
-  [node transport-id worker-id]
-  (-/init-server node)
+  [node transport-id worker-id (:.. optional)]
+  (var options (:? (> (xt/x:len optional) 0) (xt/x:first optional) nil))
+  (-/init-server node options)
   (var worker
        {"postMessage" (fn [data]
                         (. parentPort (postMessage data)))
@@ -215,24 +222,22 @@
                            -/DEFAULT_WORKER)}})))
 
 (defn nodeworker-init-string
-  [& [override]]
+  "Emits a worker with explicitly supplied local runtime options."
+  [& [override options-form]]
   (l/emit-script
-   '(do
-      (:- :import #{parentPort} :from "'worker_threads'")
-      (var node (xt.substrate/node-create {"id" xt.db.node.runtime/DEFAULT_WORKER}))
-      (xt.db.node.runtime/nodeworker-init-kernel node))
-   {:lang :js
-    :layout :full
-    :emit {:override (or override
-                         {"@sqlite.org/sqlite-wasm" "data:text/javascript,export default {}"
-                          "pg" "data:text/javascript,export default {Client: function() {}}"})}}))
+   (list 'do
+         '(:- :import #{parentPort} :from "'worker_threads'")
+         '(var node (xt.substrate/node-create {"id" xt.db.node.runtime/DEFAULT_WORKER}))
+         (list 'xt.db.node.runtime/nodeworker-init-kernel 'node nil nil (or options-form {})))
+   {:lang :js :layout :full :emit {:override (or override {})}}))
 
 (def.xt DEFAULT_NODEWORKER_SCRIPT
   (@! (nodeworker-init-string)))
 
 (defn.xt nodeworker-connect
-  [client config schema lookup source transport-id]
-  (-/init-server-proxy client)
+  [client config schema lookup source transport-id (:.. optional)]
+  (var options (:? (> (xt/x:len optional) 0) (xt/x:first optional) nil))
+  (-/init-server-proxy client options)
   (var actual-transport-id (or transport-id
                                -/DEFAULT_TRANSPORT))
   (return

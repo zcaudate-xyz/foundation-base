@@ -26,7 +26,11 @@
 
 (l/script- :js
   {:runtime :basic
-   :require [[js.net.http-fetch :as js-fetch]
+   :require [[xt.db.system.backend-postgres]
+             [xt.db.system.backend-sqlite]
+             [xt.db.system.backend-supabase]
+             [xt.db.node.kernel-supabase]
+             [js.net.http-fetch :as js-fetch]
              [xt.net.http-fetch :as http-fetch]
              [xt.net.http-util :as http-util]
              [xt.lang.common-repl :as repl]
@@ -74,7 +78,7 @@
 
 (defn.js init-proxy
   [client primary caching]
-  (var server (substrate/node-create {}))
+  (var server (xt.db.node.kernel-base/set-backends (substrate/node-create {}) {"postgres" (xt.db.system.backend-postgres/provider) "sqlite" (xt.db.system.backend-sqlite/provider) "supabase" (xt.db.system.backend-supabase/provider)}))
   (runtime/init-server server)
   (runtime/init-server-proxy client)
   (return
@@ -106,7 +110,7 @@
   ;; BASELINE
   ;;
   (notify/wait-on :js
-    (var node (substrate/node-create {}))
+    (var node (xt.db.node.kernel-base/set-backends (substrate/node-create {}) {"postgres" (xt.db.system.backend-postgres/provider) "sqlite" (xt.db.system.backend-sqlite/provider) "supabase" (xt.db.system.backend-supabase/provider)}))
     (kernel-base/init-handlers node)
     (-> (substrate/request node
                            nil
@@ -129,7 +133,7 @@
   ;; DIRECT
   ;;
   (notify/wait-on :js
-    (var node (substrate/node-create {}))
+    (var node (xt.db.node.kernel-base/set-backends (substrate/node-create {}) {"postgres" (xt.db.system.backend-postgres/provider) "sqlite" (xt.db.system.backend-sqlite/provider) "supabase" (xt.db.system.backend-supabase/provider)}))
     (-> (-/init-kernel node "supabase" "sqlite")
         (promise/x:promise-then
          (fn []
@@ -148,7 +152,7 @@
   ;; PROXY
   ;;
   (notify/wait-on :js
-    (var client (substrate/node-create {}))
+    (var client (xt.db.node.kernel-base/set-backends (substrate/node-create {}) {"postgres" (xt.db.system.backend-postgres/provider) "sqlite" (xt.db.system.backend-sqlite/provider) "supabase" (xt.db.system.backend-supabase/provider)}))
     (-> (-/init-proxy client "supabase" "sqlite")
         (promise/x:promise-then
          (fn []
@@ -170,7 +174,7 @@
   ;; DIRECT
   ;;
   (notify/wait-on :js
-    (var node (substrate/node-create {}))
+    (var node (xt.db.node.kernel-base/set-backends (substrate/node-create {}) {"postgres" (xt.db.system.backend-postgres/provider) "sqlite" (xt.db.system.backend-sqlite/provider) "supabase" (xt.db.system.backend-supabase/provider)}))
     (-> (-/init-kernel node "supabase" "sqlite")
         (promise/x:promise-then
          (fn []
@@ -189,7 +193,7 @@
   ;; PROXY
   ;;
   (notify/wait-on :js
-    (var client (substrate/node-create {}))
+    (var client (xt.db.node.kernel-base/set-backends (substrate/node-create {}) {"postgres" (xt.db.system.backend-postgres/provider) "sqlite" (xt.db.system.backend-sqlite/provider) "supabase" (xt.db.system.backend-supabase/provider)}))
     (-> (-/init-proxy client "supabase" "sqlite")
         (promise/x:promise-then
          (fn []
@@ -211,7 +215,7 @@
   ;; DIRECT
   ;;
   (notify/wait-on :js
-    (var node (substrate/node-create {}))
+    (var node (xt.db.node.kernel-base/set-backends (substrate/node-create {}) {"postgres" (xt.db.system.backend-postgres/provider) "sqlite" (xt.db.system.backend-sqlite/provider) "supabase" (xt.db.system.backend-supabase/provider)}))
     (-> (-/init-kernel node "supabase" "sqlite")
         (promise/x:promise-then
          (fn []
@@ -227,7 +231,7 @@
   ;; PROXY
   ;;
   (notify/wait-on :js
-    (var client (substrate/node-create {}))
+    (var client (xt.db.node.kernel-base/set-backends (substrate/node-create {}) {"postgres" (xt.db.system.backend-postgres/provider) "sqlite" (xt.db.system.backend-sqlite/provider) "supabase" (xt.db.system.backend-supabase/provider)}))
     (-> (-/init-proxy client "supabase" "sqlite")
         (promise/x:promise-then
          (fn []
@@ -246,7 +250,7 @@
   ;; DIRECT
   ;;
   (notify/wait-on :js
-    (var node (substrate/node-create {}))
+    (var node (xt.db.node.kernel-base/set-backends (substrate/node-create {}) {"postgres" (xt.db.system.backend-postgres/provider) "sqlite" (xt.db.system.backend-sqlite/provider) "supabase" (xt.db.system.backend-supabase/provider)}))
     (-> (-/init-kernel node "supabase" "sqlite")
         (promise/x:promise-then
          (fn []
@@ -264,7 +268,7 @@
   ;; PROXY
   ;;
   (notify/wait-on :js
-    (var client (substrate/node-create {}))
+    (var client (xt.db.node.kernel-base/set-backends (substrate/node-create {}) {"postgres" (xt.db.system.backend-postgres/provider) "sqlite" (xt.db.system.backend-sqlite/provider) "supabase" (xt.db.system.backend-supabase/provider)}))
     (-> (-/init-proxy client "supabase" "sqlite")
         (promise/x:promise-then
          (fn []
@@ -285,7 +289,7 @@
   ;; DIRECT
   ;;
   (notify/wait-on :js
-    (var node (substrate/node-create {}))
+    (var node (xt.db.node.kernel-base/set-backends (substrate/node-create {}) {"postgres" (xt.db.system.backend-postgres/provider) "sqlite" (xt.db.system.backend-sqlite/provider) "supabase" (xt.db.system.backend-supabase/provider)}))
     (-> (-/init-kernel node "supabase" "sqlite")
         (promise/x:promise-then
          (fn []
@@ -312,7 +316,7 @@
   ;; PROXY
   ;;
   (notify/wait-on :js
-    (var client (substrate/node-create {}))
+    (var client (xt.db.node.kernel-base/set-backends (substrate/node-create {}) {"postgres" (xt.db.system.backend-postgres/provider) "sqlite" (xt.db.system.backend-sqlite/provider) "supabase" (xt.db.system.backend-supabase/provider)}))
     (-> (-/init-proxy client "supabase" "sqlite")
         (promise/x:promise-then
          (fn []
@@ -346,7 +350,7 @@
   ;; DIRECT
   ;;
   (notify/wait-on :js
-    (var node (substrate/node-create {}))
+    (var node (xt.db.node.kernel-base/set-backends (substrate/node-create {}) {"postgres" (xt.db.system.backend-postgres/provider) "sqlite" (xt.db.system.backend-sqlite/provider) "supabase" (xt.db.system.backend-supabase/provider)}))
     (-> (-/init-kernel node "supabase" "sqlite")
         (promise/x:promise-then
          (fn []
@@ -370,7 +374,7 @@
   ;; PROXY
   ;;
   (notify/wait-on :js
-    (var client (substrate/node-create {}))
+    (var client (xt.db.node.kernel-base/set-backends (substrate/node-create {}) {"postgres" (xt.db.system.backend-postgres/provider) "sqlite" (xt.db.system.backend-sqlite/provider) "supabase" (xt.db.system.backend-supabase/provider)}))
     (-> (-/init-proxy client "supabase" "sqlite")
         (promise/x:promise-then
          (fn []
@@ -397,7 +401,7 @@
   ;; DIRECT
   ;;
   (notify/wait-on :js
-    (var node (substrate/node-create {}))
+    (var node (xt.db.node.kernel-base/set-backends (substrate/node-create {}) {"postgres" (xt.db.system.backend-postgres/provider) "sqlite" (xt.db.system.backend-sqlite/provider) "supabase" (xt.db.system.backend-supabase/provider)}))
     (-> (-/init-kernel node "memory" "memory")
         (promise/x:promise-then
          (fn []
@@ -428,7 +432,7 @@
   ;; PROXY
   ;;
   (notify/wait-on :js
-    (var client (substrate/node-create {}))
+    (var client (xt.db.node.kernel-base/set-backends (substrate/node-create {}) {"postgres" (xt.db.system.backend-postgres/provider) "sqlite" (xt.db.system.backend-sqlite/provider) "supabase" (xt.db.system.backend-supabase/provider)}))
     (-> (-/init-proxy client "memory" "memory")
         (promise/x:promise-then
          (fn []
@@ -455,7 +459,7 @@
   ;; DIRECT
   ;;
   (notify/wait-on :js
-    (var node (substrate/node-create {}))
+    (var node (xt.db.node.kernel-base/set-backends (substrate/node-create {}) {"postgres" (xt.db.system.backend-postgres/provider) "sqlite" (xt.db.system.backend-sqlite/provider) "supabase" (xt.db.system.backend-supabase/provider)}))
     (-> (-/init-kernel node "memory" "memory")
         (promise/x:promise-then
          (fn []
@@ -488,7 +492,7 @@
   ;; PROXY
   ;;
   (notify/wait-on :js
-    (var client (substrate/node-create {}))
+    (var client (xt.db.node.kernel-base/set-backends (substrate/node-create {}) {"postgres" (xt.db.system.backend-postgres/provider) "sqlite" (xt.db.system.backend-sqlite/provider) "supabase" (xt.db.system.backend-supabase/provider)}))
     (-> (-/init-proxy client "memory" "memory")
         (promise/x:promise-then
          (fn []
@@ -525,7 +529,7 @@
   ;; DIRECT
   ;;
   (notify/wait-on :js
-    (var node (substrate/node-create {}))
+    (var node (xt.db.node.kernel-base/set-backends (substrate/node-create {}) {"postgres" (xt.db.system.backend-postgres/provider) "sqlite" (xt.db.system.backend-sqlite/provider) "supabase" (xt.db.system.backend-supabase/provider)}))
     (-> (-/init-kernel node "postgres" "sqlite")
         (promise/x:promise-then
          (fn []
@@ -556,7 +560,7 @@
   ;; PROXY
   ;;
   (notify/wait-on :js
-    (var client (substrate/node-create {}))
+    (var client (xt.db.node.kernel-base/set-backends (substrate/node-create {}) {"postgres" (xt.db.system.backend-postgres/provider) "sqlite" (xt.db.system.backend-sqlite/provider) "supabase" (xt.db.system.backend-supabase/provider)}))
     (-> (-/init-proxy client "postgres" "sqlite")
         (promise/x:promise-then
          (fn []
@@ -592,7 +596,7 @@
   ;; DIRECT
   ;;
   (notify/wait-on :js
-    (var node (substrate/node-create {}))
+    (var node (xt.db.node.kernel-base/set-backends (substrate/node-create {}) {"postgres" (xt.db.system.backend-postgres/provider) "sqlite" (xt.db.system.backend-sqlite/provider) "supabase" (xt.db.system.backend-supabase/provider)}))
     (-> (-/init-kernel node "postgres" "sqlite")
         (promise/x:promise-then
          (fn []
@@ -631,7 +635,7 @@
   ;; PROXY
   ;;
   (notify/wait-on :js
-    (var client (substrate/node-create {}))
+    (var client (xt.db.node.kernel-base/set-backends (substrate/node-create {}) {"postgres" (xt.db.system.backend-postgres/provider) "sqlite" (xt.db.system.backend-sqlite/provider) "supabase" (xt.db.system.backend-supabase/provider)}))
     (-> (-/init-proxy client "postgres" "sqlite")
         (promise/x:promise-then
          (fn []
@@ -675,7 +679,7 @@
   ;; DIRECT
   ;;
   (notify/wait-on :js
-    (var node (substrate/node-create {}))
+    (var node (xt.db.node.kernel-base/set-backends (substrate/node-create {}) {"postgres" (xt.db.system.backend-postgres/provider) "sqlite" (xt.db.system.backend-sqlite/provider) "supabase" (xt.db.system.backend-supabase/provider)}))
     (-> (-/init-kernel node "postgres" "sqlite")
         (promise/x:promise-then
          (fn []
@@ -707,7 +711,7 @@
   ;; PROXY
   ;;
   (notify/wait-on :js
-    (var client (substrate/node-create {}))
+    (var client (xt.db.node.kernel-base/set-backends (substrate/node-create {}) {"postgres" (xt.db.system.backend-postgres/provider) "sqlite" (xt.db.system.backend-sqlite/provider) "supabase" (xt.db.system.backend-supabase/provider)}))
     (-> (-/init-proxy client "postgres" "sqlite")
         (promise/x:promise-then
          (fn []
@@ -743,7 +747,7 @@
   ;; DIRECT
   ;;
   (notify/wait-on :js
-    (var node (substrate/node-create {}))
+    (var node (xt.db.node.kernel-base/set-backends (substrate/node-create {}) {"postgres" (xt.db.system.backend-postgres/provider) "sqlite" (xt.db.system.backend-sqlite/provider) "supabase" (xt.db.system.backend-supabase/provider)}))
     (-> (-/init-kernel node "postgres" "sqlite")
         (promise/x:promise-then
          (fn []
@@ -778,7 +782,7 @@
   ;; PROXY
   ;;
   (notify/wait-on :js
-    (var client (substrate/node-create {}))
+    (var client (xt.db.node.kernel-base/set-backends (substrate/node-create {}) {"postgres" (xt.db.system.backend-postgres/provider) "sqlite" (xt.db.system.backend-sqlite/provider) "supabase" (xt.db.system.backend-supabase/provider)}))
     (-> (-/init-proxy client "postgres" "sqlite")
         (promise/x:promise-then
          (fn []
@@ -818,7 +822,7 @@
   ;; DIRECT
   ;;
   (notify/wait-on :js
-    (var node (substrate/node-create {}))
+    (var node (xt.db.node.kernel-base/set-backends (substrate/node-create {}) {"postgres" (xt.db.system.backend-postgres/provider) "sqlite" (xt.db.system.backend-sqlite/provider) "supabase" (xt.db.system.backend-supabase/provider)}))
     (-> (-/init-kernel node "postgres" "sqlite")
         (promise/x:promise-then
          (fn []
@@ -859,7 +863,7 @@
   ;; PROXY
   ;;
   (notify/wait-on :js
-    (var client (substrate/node-create {}))
+    (var client (xt.db.node.kernel-base/set-backends (substrate/node-create {}) {"postgres" (xt.db.system.backend-postgres/provider) "sqlite" (xt.db.system.backend-sqlite/provider) "supabase" (xt.db.system.backend-supabase/provider)}))
     (-> (-/init-proxy client "postgres" "sqlite")
         (promise/x:promise-then
          (fn []
@@ -905,7 +909,7 @@
   ;; DIRECT
   ;;
   (notify/wait-on :js
-    (var node (substrate/node-create {}))
+    (var node (xt.db.node.kernel-base/set-backends (substrate/node-create {}) {"postgres" (xt.db.system.backend-postgres/provider) "sqlite" (xt.db.system.backend-sqlite/provider) "supabase" (xt.db.system.backend-supabase/provider)}))
     (-> (-/init-kernel node "postgres" "sqlite")
         (promise/x:promise-then
          (fn []
@@ -949,7 +953,7 @@
   ;; PROXY
   ;;
   (notify/wait-on :js
-    (var client (substrate/node-create {}))
+    (var client (xt.db.node.kernel-base/set-backends (substrate/node-create {}) {"postgres" (xt.db.system.backend-postgres/provider) "sqlite" (xt.db.system.backend-sqlite/provider) "supabase" (xt.db.system.backend-supabase/provider)}))
     (-> (-/init-proxy client "postgres" "sqlite")
         (promise/x:promise-then
          (fn []
@@ -998,7 +1002,7 @@
   ;; DIRECT
   ;;
   (notify/wait-on :js
-    (var node (substrate/node-create {}))
+    (var node (xt.db.node.kernel-base/set-backends (substrate/node-create {}) {"postgres" (xt.db.system.backend-postgres/provider) "sqlite" (xt.db.system.backend-sqlite/provider) "supabase" (xt.db.system.backend-supabase/provider)}))
     (var dataview-spec {"table" "Log"
                         "select_entry" {"input" []
                                         "view" {"table" "Log"
@@ -1041,7 +1045,7 @@
   ;; PROXY
   ;;
   (notify/wait-on :js
-    (var client (substrate/node-create {}))
+    (var client (xt.db.node.kernel-base/set-backends (substrate/node-create {}) {"postgres" (xt.db.system.backend-postgres/provider) "sqlite" (xt.db.system.backend-sqlite/provider) "supabase" (xt.db.system.backend-supabase/provider)}))
     (var dataview-spec {"table" "Log"
                         "select_entry" {"input" []
                                         "view" {"table" "Log"
@@ -1089,7 +1093,7 @@
   ;; DIRECT
   ;;
   (notify/wait-on :js
-    (var node (substrate/node-create {}))
+    (var node (xt.db.node.kernel-base/set-backends (substrate/node-create {}) {"postgres" (xt.db.system.backend-postgres/provider) "sqlite" (xt.db.system.backend-sqlite/provider) "supabase" (xt.db.system.backend-supabase/provider)}))
     (-> (-/init-kernel node "postgres" "sqlite")
         (promise/x:promise-then
          (fn []
@@ -1145,7 +1149,7 @@
   ;; PROXY
   ;;
   (notify/wait-on :js
-    (var client (substrate/node-create {}))
+    (var client (xt.db.node.kernel-base/set-backends (substrate/node-create {}) {"postgres" (xt.db.system.backend-postgres/provider) "sqlite" (xt.db.system.backend-sqlite/provider) "supabase" (xt.db.system.backend-supabase/provider)}))
     (-> (-/init-proxy client "postgres" "sqlite")
         (promise/x:promise-then
          (fn []

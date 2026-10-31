@@ -1,0 +1,6 @@
+FROM node:24-bookworm-slim
+WORKDIR /bridge
+COPY package.json package-lock.json ./
+RUN npm ci --omit=dev
+COPY *.mjs ./
+CMD ["node", "development.mjs"]

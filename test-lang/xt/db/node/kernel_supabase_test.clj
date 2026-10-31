@@ -28,7 +28,8 @@
 
 (l/script- :js
   {:runtime :basic
-   :require [[js.net.http-fetch :as js-fetch]
+   :require [[xt.db.system.backend-supabase :as backend-supabase]
+             [js.net.http-fetch :as js-fetch]
              [xt.net.http-fetch :as http-fetch]
              [xt.net.http-util :as http-util]
              [xt.lang.common-repl :as repl]
@@ -67,7 +68,7 @@
   (var impl (main/create-impl "supabase"
                               (xt/x:get-key client "defaults")
                               nil
-                              nil))
+                              nil {"supabase" (xt.db.system.backend-supabase/provider)}))
   (session/set-session impl session)
   (substrate/set-service node "auth/supabase" impl)
   (return node))
