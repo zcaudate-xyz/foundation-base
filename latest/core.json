@@ -1,27 +1,27 @@
 {
   "failure-counts" : {
-    "failed" : 1145,
-    "throw" : 305,
+    "failed" : 1157,
+    "throw" : 190,
     "timeout" : 0,
-    "errored" : 5
+    "errored" : 3
   },
   "run" : {
-    "id" : 38334199681,
-    "number" : 489,
+    "id" : 41202298908,
+    "number" : 490,
     "attempt" : 1,
-    "url" : "https://github.com/zcaudate-xyz/foundation-base/actions/runs/38334199681"
+    "url" : "https://github.com/zcaudate-xyz/foundation-base/actions/runs/41202298908"
   },
   "workflow-key" : "core",
   "tests" : {
-    "passed" : 2385,
-    "failed" : 1145,
-    "throw" : 305,
+    "passed" : 1662,
+    "failed" : 1157,
+    "throw" : 190,
     "timeout" : 0,
-    "skipped" : 1,
-    "errored" : 5
+    "skipped" : 4,
+    "errored" : 3
   },
   "git" : {
-    "sha" : "67cbff9bf6f1515f1bfe3c9099b74ca46a2d3f8e",
+    "sha" : "33e9e268aeda9411f1df0c1f783a3935f9ce3f5e",
     "ref" : "refs/heads/main",
     "event" : "push"
   },
@@ -29,70 +29,9 @@
   "jobs" : [ {
     "failure-counts" : {
       "errored" : 2,
-      "throw" : 0,
+      "throw" : 40,
       "timeout" : 0,
-      "failed" : 0
-    },
-    "run" : {
-      "number" : null,
-      "id" : null,
-      "url" : null,
-      "attempt" : 1
-    },
-    "workflow-key" : "local",
-    "tests" : {
-      "passed" : 298,
-      "skipped" : 1,
-      "errored" : 2,
-      "throw" : 0,
-      "timeout" : 0,
-      "failed" : 0
-    },
-    "generated-count" : 46,
-    "git" : {
-      "ref" : null,
-      "event" : null,
-      "sha" : null
-    },
-    "schema-version" : 1,
-    "recorded-at" : "2026-10-13T02:02:37.727913753Z",
-    "spec" : null,
-    "workflow-name" : "local",
-    "status" : "failure",
-    "language" : "dart",
-    "kind" : "xtbench-job",
-    "metrics-status" : "complete",
-    "suite" : "xt.db",
-    "failing-count" : 2,
-    "failures" : [ {
-      "runtime-namespace" : "xtbench.dart.db.node.example-auth-profile-view-test",
-      "counts" : {
-        "errored" : 1
-      },
-      "functions" : [ ],
-      "namespace-errors" : [ {
-        "type" : "errored",
-        "count" : 1
-      } ],
-      "namespace" : "db.node.example-auth-profile-view-test"
-    }, {
-      "runtime-namespace" : "xtbench.dart.db.system.impl-supabase-realtime-test",
-      "counts" : {
-        "errored" : 1
-      },
-      "functions" : [ ],
-      "namespace-errors" : [ {
-        "type" : "errored",
-        "count" : 1
-      } ],
-      "namespace" : "db.system.impl-supabase-realtime-test"
-    } ]
-  }, {
-    "failure-counts" : {
-      "errored" : 2,
-      "throw" : 34,
-      "timeout" : 0,
-      "failed" : 275
+      "failed" : 290
     },
     "run" : {
       "number" : null,
@@ -103,20 +42,20 @@
     "workflow-key" : "local",
     "tests" : {
       "passed" : 2,
-      "skipped" : 0,
+      "skipped" : 2,
       "errored" : 2,
-      "throw" : 34,
+      "throw" : 40,
       "timeout" : 0,
-      "failed" : 275
+      "failed" : 290
     },
-    "generated-count" : 46,
+    "generated-count" : 52,
     "git" : {
       "ref" : null,
       "event" : null,
       "sha" : null
     },
     "schema-version" : 1,
-    "recorded-at" : "2026-10-13T02:09:40.248707038Z",
+    "recorded-at" : "2026-10-31T12:58:04.427980442Z",
     "spec" : null,
     "workflow-name" : "local",
     "status" : "failure",
@@ -124,12 +63,12 @@
     "kind" : "xtbench-job",
     "metrics-status" : "complete",
     "suite" : "xt.db",
-    "failing-count" : 311,
+    "failing-count" : 332,
     "failures" : [ {
       "runtime-namespace" : "xtbench.lua.db.node.example-auth-profile-test",
       "counts" : {
-        "throw" : 1,
-        "failed" : 2
+        "throw" : 2,
+        "failed" : 1
       },
       "functions" : [ {
         "counts" : {
@@ -144,12 +83,12 @@
         } ]
       }, {
         "counts" : {
-          "failed" : 1
+          "throw" : 1
         },
         "function" : "xt.db.node.example-auth-profile/auth-profile-models.integration",
         "locations" : [ {
           "path" : "test-lang/xtbench/lua/db/node/example_auth_profile_test.clj",
-          "type" : "failed",
+          "type" : "throw",
           "line" : 80,
           "count" : 1
         } ]
@@ -306,6 +245,107 @@
       } ],
       "namespace-errors" : [ ],
       "namespace" : "db.node.proxy-util-test"
+    }, {
+      "runtime-namespace" : "xtbench.lua.db.system.backend-selection-test",
+      "counts" : {
+        "throw" : 1,
+        "failed" : 9
+      },
+      "functions" : [ {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.db.node.kernel-base/kernel-teardown-main",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/db/system/backend_selection_test.clj",
+          "type" : "failed",
+          "line" : 173,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 2
+        },
+        "function" : "xt.db.node.kernel-base/set-backends",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/db/system/backend_selection_test.clj",
+          "type" : "failed",
+          "line" : 59,
+          "count" : 1
+        }, {
+          "path" : "test-lang/xtbench/lua/db/system/backend_selection_test.clj",
+          "type" : "failed",
+          "line" : 149,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.db.node.runtime/init-server",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/db/system/backend_selection_test.clj",
+          "type" : "failed",
+          "line" : 102,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.db.system.main-client/create-client",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/db/system/backend_selection_test.clj",
+          "type" : "failed",
+          "line" : 50,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.db.system.main-client/get-provider",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/db/system/backend_selection_test.clj",
+          "type" : "throw",
+          "line" : 40,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 2
+        },
+        "function" : "xt.db.system.main/create-impl",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/db/system/backend_selection_test.clj",
+          "type" : "failed",
+          "line" : 33,
+          "count" : 1
+        }, {
+          "path" : "test-lang/xtbench/lua/db/system/backend_selection_test.clj",
+          "type" : "failed",
+          "line" : 116,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 2
+        },
+        "function" : "xt.db.system.main/create-impl-init",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/db/system/backend_selection_test.clj",
+          "type" : "failed",
+          "line" : 84,
+          "count" : 1
+        }, {
+          "path" : "test-lang/xtbench/lua/db/system/backend_selection_test.clj",
+          "type" : "failed",
+          "line" : 131,
+          "count" : 1
+        } ]
+      } ],
+      "namespace-errors" : [ ],
+      "namespace" : "db.system.backend-selection-test"
     }, {
       "runtime-namespace" : "xtbench.lua.db.system.impl-common-test",
       "counts" : {
@@ -522,6 +562,131 @@
       } ],
       "namespace-errors" : [ ],
       "namespace" : "db.system.impl-memory-test"
+    }, {
+      "runtime-namespace" : "xtbench.lua.db.system.impl-neon-test",
+      "counts" : {
+        "throw" : 4,
+        "failed" : 7
+      },
+      "functions" : [ {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.db.system.impl-neon-realtime/apply-events",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/db/system/impl_neon_test.clj",
+          "type" : "failed",
+          "line" : 109,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.db.system.impl-neon-realtime/current?",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/db/system/impl_neon_test.clj",
+          "type" : "failed",
+          "line" : 85,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.db.system.impl-neon-realtime/sequence-after?",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/db/system/impl_neon_test.clj",
+          "type" : "failed",
+          "line" : 100,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.db.system.impl-neon-session/set-session",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/db/system/impl_neon_test.clj",
+          "type" : "throw",
+          "line" : 92,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.db.system.impl-neon/cmd-rpc-call-async",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/db/system/impl_neon_test.clj",
+          "type" : "throw",
+          "line" : 56,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.db.system.impl-neon/impl-neon",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/db/system/impl_neon_test.clj",
+          "type" : "failed",
+          "line" : 26,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.db.system.impl-neon/request-input",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/db/system/impl_neon_test.clj",
+          "type" : "throw",
+          "line" : 46,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1,
+          "failed" : 1
+        },
+        "function" : "xt.db.system.impl-neon/response-data",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/db/system/impl_neon_test.clj",
+          "type" : "failed",
+          "line" : 33,
+          "count" : 1
+        }, {
+          "path" : "test-lang/xtbench/lua/db/system/impl_neon_test.clj",
+          "type" : "throw",
+          "line" : 68,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.db.system.main/create-impl",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/db/system/impl_neon_test.clj",
+          "type" : "failed",
+          "line" : 39,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.net.addon-neon/response-data",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/db/system/impl_neon_test.clj",
+          "type" : "failed",
+          "line" : 74,
+          "count" : 1
+        } ]
+      } ],
+      "namespace-errors" : [ ],
+      "namespace" : "db.system.impl-neon-test"
     }, {
       "runtime-namespace" : "xtbench.lua.db.system.impl-sqlite-test",
       "counts" : {
@@ -3540,9 +3705,9 @@
   }, {
     "failure-counts" : {
       "errored" : 1,
-      "throw" : 109,
+      "throw" : 15,
       "timeout" : 0,
-      "failed" : 2
+      "failed" : 0
     },
     "run" : {
       "number" : null,
@@ -3552,21 +3717,21 @@
     },
     "workflow-key" : "local",
     "tests" : {
-      "passed" : 217,
-      "skipped" : 0,
+      "passed" : 333,
+      "skipped" : 2,
       "errored" : 1,
-      "throw" : 109,
+      "throw" : 15,
       "timeout" : 0,
-      "failed" : 2
+      "failed" : 0
     },
-    "generated-count" : 46,
+    "generated-count" : 52,
     "git" : {
       "ref" : null,
       "event" : null,
       "sha" : null
     },
     "schema-version" : 1,
-    "recorded-at" : "2026-10-13T02:04:06.004423464Z",
+    "recorded-at" : "2026-10-31T12:49:12.607680263Z",
     "spec" : null,
     "workflow-name" : "local",
     "status" : "failure",
@@ -3574,24 +3739,13 @@
     "kind" : "xtbench-job",
     "metrics-status" : "complete",
     "suite" : "xt.db",
-    "failing-count" : 112,
+    "failing-count" : 16,
     "failures" : [ {
       "runtime-namespace" : "xtbench.python.db.node.example-auth-profile-test",
       "counts" : {
-        "throw" : 2
+        "throw" : 1
       },
       "functions" : [ {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.db.node.example-auth-profile/auth-profile-models.integration",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/python/db/node/example_auth_profile_test.clj",
-          "type" : "throw",
-          "line" : 79,
-          "count" : 1
-        } ]
-      }, {
         "counts" : {
           "throw" : 1
         },
@@ -3617,139 +3771,11 @@
       } ],
       "namespace" : "db.node.example-auth-profile-view-test"
     }, {
-      "runtime-namespace" : "xtbench.python.db.node.proxy-base-test",
-      "counts" : {
-        "throw" : 2,
-        "failed" : 1
-      },
-      "functions" : [ {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.db.node.proxy-base/attach-forward-handler",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/python/db/node/proxy_base_test.clj",
-          "type" : "throw",
-          "line" : 94,
-          "count" : 1
-        } ]
-      }, {
-        "counts" : {
-          "failed" : 1
-        },
-        "function" : "xt.db.node.proxy-base/detach-forward-handler",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/python/db/node/proxy_base_test.clj",
-          "type" : "failed",
-          "line" : 133,
-          "count" : 1
-        } ]
-      }, {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.db.node.proxy-base/request-proxy",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/python/db/node/proxy_base_test.clj",
-          "type" : "throw",
-          "line" : 71,
-          "count" : 1
-        } ]
-      } ],
-      "namespace-errors" : [ ],
-      "namespace" : "db.node.proxy-base-test"
-    }, {
-      "runtime-namespace" : "xtbench.python.db.node.proxy-util-test",
-      "counts" : {
-        "throw" : 5,
-        "failed" : 1
-      },
-      "functions" : [ {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.db.node.proxy-util/get-default-transport",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/python/db/node/proxy_util_test.clj",
-          "type" : "throw",
-          "line" : 78,
-          "count" : 1
-        } ]
-      }, {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.db.node.proxy-util/get-transport-id",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/python/db/node/proxy_util_test.clj",
-          "type" : "throw",
-          "line" : 87,
-          "count" : 1
-        } ]
-      }, {
-        "counts" : {
-          "failed" : 1
-        },
-        "function" : "xt.db.node.proxy-util/request-client",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/python/db/node/proxy_util_test.clj",
-          "type" : "failed",
-          "line" : 131,
-          "count" : 1
-        } ]
-      }, {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.db.node.proxy-util/request-meta",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/python/db/node/proxy_util_test.clj",
-          "type" : "throw",
-          "line" : 97,
-          "count" : 1
-        } ]
-      }, {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.db.node.proxy-util/request-proxy",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/python/db/node/proxy_util_test.clj",
-          "type" : "throw",
-          "line" : 108,
-          "count" : 1
-        } ]
-      }, {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.db.node.proxy-util/set-default-transport",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/python/db/node/proxy_util_test.clj",
-          "type" : "throw",
-          "line" : 69,
-          "count" : 1
-        } ]
-      } ],
-      "namespace-errors" : [ ],
-      "namespace" : "db.node.proxy-util-test"
-    }, {
       "runtime-namespace" : "xtbench.python.db.system.impl-common-test",
       "counts" : {
-        "throw" : 4
+        "throw" : 3
       },
       "functions" : [ {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.db.system.impl-common/remove-db-listener-default",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/python/db/system/impl_common_test.clj",
-          "type" : "throw",
-          "line" : 42,
-          "count" : 1
-        } ]
-      }, {
         "counts" : {
           "throw" : 3
         },
@@ -3776,53 +3802,9 @@
     }, {
       "runtime-namespace" : "xtbench.python.db.system.impl-memory-test",
       "counts" : {
-        "throw" : 8
+        "throw" : 1
       },
       "functions" : [ {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.db.system.impl-memory/clear-db",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/python/db/system/impl_memory_test.clj",
-          "type" : "throw",
-          "line" : 92,
-          "count" : 1
-        } ]
-      }, {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.db.system.impl-memory/impl-memory",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/python/db/system/impl_memory_test.clj",
-          "type" : "throw",
-          "line" : 164,
-          "count" : 1
-        } ]
-      }, {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.db.system.impl-memory/process-add-event",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/python/db/system/impl_memory_test.clj",
-          "type" : "throw",
-          "line" : 108,
-          "count" : 1
-        } ]
-      }, {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.db.system.impl-memory/process-remove-event",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/python/db/system/impl_memory_test.clj",
-          "type" : "throw",
-          "line" : 142,
-          "count" : 1
-        } ]
-      }, {
         "counts" : {
           "throw" : 1
         },
@@ -3833,182 +3815,15 @@
           "line" : 22,
           "count" : 1
         } ]
-      }, {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.db.system.impl-memory/pull-async",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/python/db/system/impl_memory_test.clj",
-          "type" : "throw",
-          "line" : 38,
-          "count" : 1
-        } ]
-      }, {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.db.system.impl-memory/record-add",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/python/db/system/impl_memory_test.clj",
-          "type" : "throw",
-          "line" : 57,
-          "count" : 1
-        } ]
-      }, {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.db.system.impl-memory/record-delete",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/python/db/system/impl_memory_test.clj",
-          "type" : "throw",
-          "line" : 74,
-          "count" : 1
-        } ]
       } ],
       "namespace-errors" : [ ],
       "namespace" : "db.system.impl-memory-test"
     }, {
-      "runtime-namespace" : "xtbench.python.db.system.impl-sqlite-test",
-      "counts" : {
-        "throw" : 10
-      },
-      "functions" : [ {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.db.system.impl-sqlite/clear-db",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/python/db/system/impl_sqlite_test.clj",
-          "type" : "throw",
-          "line" : 84,
-          "count" : 1
-        } ]
-      }, {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.db.system.impl-sqlite/impl-sqlite",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/python/db/system/impl_sqlite_test.clj",
-          "type" : "throw",
-          "line" : 126,
-          "count" : 1
-        } ]
-      }, {
-        "counts" : {
-          "throw" : 2
-        },
-        "function" : "xt.db.system.impl-sqlite/impl-sqlite-init",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/python/db/system/impl_sqlite_test.clj",
-          "type" : "throw",
-          "line" : 135,
-          "count" : 1
-        }, {
-          "path" : "test-lang/xtbench/python/db/system/impl_sqlite_test.clj",
-          "type" : "throw",
-          "line" : 150,
-          "count" : 1
-        } ]
-      }, {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.db.system.impl-sqlite/process-add-event",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/python/db/system/impl_sqlite_test.clj",
-          "type" : "throw",
-          "line" : 98,
-          "count" : 1
-        } ]
-      }, {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.db.system.impl-sqlite/process-remove-event",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/python/db/system/impl_sqlite_test.clj",
-          "type" : "throw",
-          "line" : 112,
-          "count" : 1
-        } ]
-      }, {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.db.system.impl-sqlite/pull",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/python/db/system/impl_sqlite_test.clj",
-          "type" : "throw",
-          "line" : 39,
-          "count" : 1
-        } ]
-      }, {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.db.system.impl-sqlite/pull-async",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/python/db/system/impl_sqlite_test.clj",
-          "type" : "throw",
-          "line" : 54,
-          "count" : 1
-        } ]
-      }, {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.db.system.impl-sqlite/record-add",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/python/db/system/impl_sqlite_test.clj",
-          "type" : "throw",
-          "line" : 72,
-          "count" : 1
-        } ]
-      }, {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.db.system.impl-sqlite/rpc-call-async",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/python/db/system/impl_sqlite_test.clj",
-          "type" : "throw",
-          "line" : 166,
-          "count" : 1
-        } ]
-      } ],
-      "namespace-errors" : [ ],
-      "namespace" : "db.system.impl-sqlite-test"
-    }, {
       "runtime-namespace" : "xtbench.python.db.system.impl-supabase-realtime-test",
       "counts" : {
-        "throw" : 26
+        "throw" : 8
       },
       "functions" : [ {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.db.system.impl-supabase-realtime/add-realtime-callback",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/python/db/system/impl_supabase_realtime_test.clj",
-          "type" : "throw",
-          "line" : 327,
-          "count" : 1
-        } ]
-      }, {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.db.system.impl-supabase-realtime/create-realtime",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/python/db/system/impl_supabase_realtime_test.clj",
-          "type" : "throw",
-          "line" : 216,
-          "count" : 1
-        } ]
-      }, {
         "counts" : {
           "throw" : 2
         },
@@ -4028,103 +3843,22 @@
         "counts" : {
           "throw" : 1
         },
-        "function" : "xt.db.system.impl-supabase-realtime/create-realtime-on-message.phx-reply",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/python/db/system/impl_supabase_realtime_test.clj",
-          "type" : "throw",
-          "line" : 188,
-          "count" : 1
-        } ]
-      }, {
-        "counts" : {
-          "throw" : 2
-        },
         "function" : "xt.db.system.impl-supabase-realtime/create-sync-callback",
         "locations" : [ {
           "path" : "test-lang/xtbench/python/db/system/impl_supabase_realtime_test.clj",
           "type" : "throw",
           "line" : 168,
           "count" : 1
-        }, {
-          "path" : "test-lang/xtbench/python/db/system/impl_supabase_realtime_test.clj",
-          "type" : "throw",
-          "line" : 427,
-          "count" : 1
         } ]
       }, {
         "counts" : {
           "throw" : 1
-        },
-        "function" : "xt.db.system.impl-supabase-realtime/create-sync-callback.remove",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/python/db/system/impl_supabase_realtime_test.clj",
-          "type" : "throw",
-          "line" : 562,
-          "count" : 1
-        } ]
-      }, {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.db.system.impl-supabase-realtime/ensure-realtime",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/python/db/system/impl_supabase_realtime_test.clj",
-          "type" : "throw",
-          "line" : 264,
-          "count" : 1
-        } ]
-      }, {
-        "counts" : {
-          "throw" : 2
         },
         "function" : "xt.db.system.impl-supabase-realtime/get-auth-token",
         "locations" : [ {
           "path" : "test-lang/xtbench/python/db/system/impl_supabase_realtime_test.clj",
           "type" : "throw",
           "line" : 62,
-          "count" : 1
-        }, {
-          "path" : "test-lang/xtbench/python/db/system/impl_supabase_realtime_test.clj",
-          "type" : "throw",
-          "line" : 74,
-          "count" : 1
-        } ]
-      }, {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.db.system.impl-supabase-realtime/get-realtime",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/python/db/system/impl_supabase_realtime_test.clj",
-          "type" : "throw",
-          "line" : 235,
-          "count" : 1
-        } ]
-      }, {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.db.system.impl-supabase-realtime/get-realtime-callback",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/python/db/system/impl_supabase_realtime_test.clj",
-          "type" : "throw",
-          "line" : 304,
-          "count" : 1
-        } ]
-      }, {
-        "counts" : {
-          "throw" : 2
-        },
-        "function" : "xt.db.system.impl-supabase-realtime/get-topics",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/python/db/system/impl_supabase_realtime_test.clj",
-          "type" : "throw",
-          "line" : 375,
-          "count" : 1
-        }, {
-          "path" : "test-lang/xtbench/python/db/system/impl_supabase_realtime_test.clj",
-          "type" : "throw",
-          "line" : 384,
           "count" : 1
         } ]
       }, {
@@ -4136,72 +3870,6 @@
           "path" : "test-lang/xtbench/python/db/system/impl_supabase_realtime_test.clj",
           "type" : "throw",
           "line" : 48,
-          "count" : 1
-        } ]
-      }, {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.db.system.impl-supabase-realtime/remove-realtime",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/python/db/system/impl_supabase_realtime_test.clj",
-          "type" : "throw",
-          "line" : 286,
-          "count" : 1
-        } ]
-      }, {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.db.system.impl-supabase-realtime/remove-realtime-callback",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/python/db/system/impl_supabase_realtime_test.clj",
-          "type" : "throw",
-          "line" : 349,
-          "count" : 1
-        } ]
-      }, {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.db.system.impl-supabase-realtime/set-realtime",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/python/db/system/impl_supabase_realtime_test.clj",
-          "type" : "throw",
-          "line" : 249,
-          "count" : 1
-        } ]
-      }, {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.db.system.impl-supabase-realtime/subscribe",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/python/db/system/impl_supabase_realtime_test.clj",
-          "type" : "throw",
-          "line" : 403,
-          "count" : 1
-        } ]
-      }, {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.db.system.impl-supabase-realtime/subscribe.remove",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/python/db/system/impl_supabase_realtime_test.clj",
-          "type" : "throw",
-          "line" : 497,
-          "count" : 1
-        } ]
-      }, {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.db.system.impl-supabase-realtime/subscribe.sync",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/python/db/system/impl_supabase_realtime_test.clj",
-          "type" : "throw",
-          "line" : 456,
           "count" : 1
         } ]
       }, {
@@ -4237,467 +3905,9 @@
           "line" : 121,
           "count" : 1
         } ]
-      }, {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.db.system.impl-supabase-realtime/unsubscribe",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/python/db/system/impl_supabase_realtime_test.clj",
-          "type" : "throw",
-          "line" : 544,
-          "count" : 1
-        } ]
       } ],
       "namespace-errors" : [ ],
       "namespace" : "db.system.impl-supabase-realtime-test"
-    }, {
-      "runtime-namespace" : "xtbench.python.db.system.memory-graph-test",
-      "counts" : {
-        "throw" : 14
-      },
-      "functions" : [ {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.db.system.memory-graph/check-clause-function",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/python/db/system/memory_graph_test.clj",
-          "type" : "throw",
-          "line" : 68,
-          "count" : 1
-        } ]
-      }, {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.db.system.memory-graph/check-clause-value",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/python/db/system/memory_graph_test.clj",
-          "type" : "throw",
-          "line" : 48,
-          "count" : 1
-        } ]
-      }, {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.db.system.memory-graph/data-field",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/python/db/system/memory_graph_test.clj",
-          "type" : "throw",
-          "line" : 124,
-          "count" : 1
-        } ]
-      }, {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.db.system.memory-graph/project-record",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/python/db/system/memory_graph_test.clj",
-          "type" : "throw",
-          "line" : 140,
-          "count" : 1
-        } ]
-      }, {
-        "counts" : {
-          "throw" : 2
-        },
-        "function" : "xt.db.system.memory-graph/pull",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/python/db/system/memory_graph_test.clj",
-          "type" : "throw",
-          "line" : 206,
-          "count" : 1
-        }, {
-          "path" : "test-lang/xtbench/python/db/system/memory_graph_test.clj",
-          "type" : "throw",
-          "line" : 225,
-          "count" : 1
-        } ]
-      }, {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.db.system.memory-graph/pull-entries",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/python/db/system/memory_graph_test.clj",
-          "type" : "throw",
-          "line" : 184,
-          "count" : 1
-        } ]
-      }, {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.db.system.memory-graph/view-combined",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/python/db/system/memory_graph_test.clj",
-          "type" : "throw",
-          "line" : 315,
-          "count" : 1
-        } ]
-      }, {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.db.system.memory-graph/view-count",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/python/db/system/memory_graph_test.clj",
-          "type" : "throw",
-          "line" : 260,
-          "count" : 1
-        } ]
-      }, {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.db.system.memory-graph/view-return",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/python/db/system/memory_graph_test.clj",
-          "type" : "throw",
-          "line" : 276,
-          "count" : 1
-        } ]
-      }, {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.db.system.memory-graph/view-return-bulk",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/python/db/system/memory_graph_test.clj",
-          "type" : "throw",
-          "line" : 294,
-          "count" : 1
-        } ]
-      }, {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.db.system.memory-graph/view-select",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/python/db/system/memory_graph_test.clj",
-          "type" : "throw",
-          "line" : 243,
-          "count" : 1
-        } ]
-      }, {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.db.system.memory-graph/where",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/python/db/system/memory_graph_test.clj",
-          "type" : "throw",
-          "line" : 106,
-          "count" : 1
-        } ]
-      }, {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.db.system.memory-graph/where-clause",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/python/db/system/memory_graph_test.clj",
-          "type" : "throw",
-          "line" : 89,
-          "count" : 1
-        } ]
-      } ],
-      "namespace-errors" : [ ],
-      "namespace" : "db.system.memory-graph-test"
-    }, {
-      "runtime-namespace" : "xtbench.python.db.system.memory-util-test",
-      "counts" : {
-        "throw" : 17
-      },
-      "functions" : [ {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.db.system.memory-util/add-bulk",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/python/db/system/memory_util_test.clj",
-          "type" : "throw",
-          "line" : 422,
-          "count" : 1
-        } ]
-      }, {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.db.system.memory-util/add-bulk-links",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/python/db/system/memory_util_test.clj",
-          "type" : "throw",
-          "line" : 386,
-          "count" : 1
-        } ]
-      }, {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.db.system.memory-util/add-single-link",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/python/db/system/memory_util_test.clj",
-          "type" : "throw",
-          "line" : 352,
-          "count" : 1
-        } ]
-      }, {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.db.system.memory-util/add-single-link-entry",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/python/db/system/memory_util_test.clj",
-          "type" : "throw",
-          "line" : 326,
-          "count" : 1
-        } ]
-      }, {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.db.system.memory-util/all-records",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/python/db/system/memory_util_test.clj",
-          "type" : "throw",
-          "line" : 172,
-          "count" : 1
-        } ]
-      }, {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.db.system.memory-util/get-changed-single",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/python/db/system/memory_util_test.clj",
-          "type" : "throw",
-          "line" : 184,
-          "count" : 1
-        } ]
-      }, {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.db.system.memory-util/get-entry",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/python/db/system/memory_util_test.clj",
-          "type" : "throw",
-          "line" : 49,
-          "count" : 1
-        } ]
-      }, {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.db.system.memory-util/get-ids",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/python/db/system/memory_util_test.clj",
-          "type" : "throw",
-          "line" : 144,
-          "count" : 1
-        } ]
-      }, {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.db.system.memory-util/has-changed-single",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/python/db/system/memory_util_test.clj",
-          "type" : "throw",
-          "line" : 203,
-          "count" : 1
-        } ]
-      }, {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.db.system.memory-util/has-entry",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/python/db/system/memory_util_test.clj",
-          "type" : "throw",
-          "line" : 22,
-          "count" : 1
-        } ]
-      }, {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.db.system.memory-util/merge-bulk",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/python/db/system/memory_util_test.clj",
-          "type" : "throw",
-          "line" : 131,
-          "count" : 1
-        } ]
-      }, {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.db.system.memory-util/merge-single",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/python/db/system/memory_util_test.clj",
-          "type" : "throw",
-          "line" : 79,
-          "count" : 1
-        } ]
-      }, {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.db.system.memory-util/remove-bulk",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/python/db/system/memory_util_test.clj",
-          "type" : "throw",
-          "line" : 307,
-          "count" : 1
-        } ]
-      }, {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.db.system.memory-util/remove-single",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/python/db/system/memory_util_test.clj",
-          "type" : "throw",
-          "line" : 291,
-          "count" : 1
-        } ]
-      }, {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.db.system.memory-util/remove-single-link",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/python/db/system/memory_util_test.clj",
-          "type" : "throw",
-          "line" : 258,
-          "count" : 1
-        } ]
-      }, {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.db.system.memory-util/remove-single-link-entry",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/python/db/system/memory_util_test.clj",
-          "type" : "throw",
-          "line" : 235,
-          "count" : 1
-        } ]
-      }, {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.db.system.memory-util/swap-if-entry",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/python/db/system/memory_util_test.clj",
-          "type" : "throw",
-          "line" : 62,
-          "count" : 1
-        } ]
-      } ],
-      "namespace-errors" : [ ],
-      "namespace" : "db.system.memory-util-test"
-    }, {
-      "runtime-namespace" : "xtbench.python.db.text.base-flatten-test",
-      "counts" : {
-        "throw" : 8
-      },
-      "functions" : [ {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.db.text.base-flatten/flatten",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/python/db/text/base_flatten_test.clj",
-          "type" : "throw",
-          "line" : 302,
-          "count" : 1
-        } ]
-      }, {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.db.text.base-flatten/flatten-bulk",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/python/db/text/base_flatten_test.clj",
-          "type" : "throw",
-          "line" : 312,
-          "count" : 1
-        } ]
-      }, {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.db.text.base-flatten/flatten-bulk-ids",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/python/db/text/base_flatten_test.clj",
-          "type" : "throw",
-          "line" : 328,
-          "count" : 1
-        } ]
-      }, {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.db.text.base-flatten/flatten-linked",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/python/db/text/base_flatten_test.clj",
-          "type" : "throw",
-          "line" : 130,
-          "count" : 1
-        } ]
-      }, {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.db.text.base-flatten/flatten-node",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/python/db/text/base_flatten_test.clj",
-          "type" : "throw",
-          "line" : 40,
-          "count" : 1
-        } ]
-      }, {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.db.text.base-flatten/flatten-node.account",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/python/db/text/base_flatten_test.clj",
-          "type" : "throw",
-          "line" : 68,
-          "count" : 1
-        } ]
-      }, {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.db.text.base-flatten/flatten-node.profile",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/python/db/text/base_flatten_test.clj",
-          "type" : "throw",
-          "line" : 96,
-          "count" : 1
-        } ]
-      }, {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.db.text.base-flatten/flatten-obj",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/python/db/text/base_flatten_test.clj",
-          "type" : "throw",
-          "line" : 291,
-          "count" : 1
-        } ]
-      } ],
-      "namespace-errors" : [ ],
-      "namespace" : "db.text.base-flatten-test"
     }, {
       "runtime-namespace" : "xtbench.python.db.text.sql-call-test",
       "counts" : {
@@ -4728,113 +3938,6 @@
       } ],
       "namespace-errors" : [ ],
       "namespace" : "db.text.sql-call-test"
-    }, {
-      "runtime-namespace" : "xtbench.python.db.text.sql-table-test",
-      "counts" : {
-        "throw" : 10
-      },
-      "functions" : [ {
-        "counts" : {
-          "throw" : 4
-        },
-        "function" : "xt.db.text.sql-table/prepare-add-input",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/python/db/text/sql_table_test.clj",
-          "type" : "throw",
-          "line" : 129,
-          "count" : 1
-        }, {
-          "path" : "test-lang/xtbench/python/db/text/sql_table_test.clj",
-          "type" : "throw",
-          "line" : 136,
-          "count" : 1
-        }, {
-          "path" : "test-lang/xtbench/python/db/text/sql_table_test.clj",
-          "type" : "throw",
-          "line" : 142,
-          "count" : 1
-        }, {
-          "path" : "test-lang/xtbench/python/db/text/sql_table_test.clj",
-          "type" : "throw",
-          "line" : 149,
-          "count" : 1
-        } ]
-      }, {
-        "counts" : {
-          "throw" : 3
-        },
-        "function" : "xt.db.text.sql-table/prepare-remove-input",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/python/db/text/sql_table_test.clj",
-          "type" : "throw",
-          "line" : 159,
-          "count" : 1
-        }, {
-          "path" : "test-lang/xtbench/python/db/text/sql_table_test.clj",
-          "type" : "throw",
-          "line" : 166,
-          "count" : 1
-        }, {
-          "path" : "test-lang/xtbench/python/db/text/sql_table_test.clj",
-          "type" : "throw",
-          "line" : 174,
-          "count" : 1
-        } ]
-      }, {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.db.text.sql-table/table-insert",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/python/db/text/sql_table_test.clj",
-          "type" : "throw",
-          "line" : 78,
-          "count" : 1
-        } ]
-      }, {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.db.text.sql-table/table-update-single",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/python/db/text/sql_table_test.clj",
-          "type" : "throw",
-          "line" : 20,
-          "count" : 1
-        } ]
-      }, {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.db.text.sql-table/table-upsert",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/python/db/text/sql_table_test.clj",
-          "type" : "throw",
-          "line" : 118,
-          "count" : 1
-        } ]
-      } ],
-      "namespace-errors" : [ ],
-      "namespace" : "db.text.sql-table-test"
-    }, {
-      "runtime-namespace" : "xtbench.python.db.text.sql-util-test",
-      "counts" : {
-        "throw" : 1
-      },
-      "functions" : [ {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.db.text.sql-util/sqlite-return-format-fn",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/python/db/text/sql_util_test.clj",
-          "type" : "throw",
-          "line" : 430,
-          "count" : 1
-        } ]
-      } ],
-      "namespace-errors" : [ ],
-      "namespace" : "db.text.sql-util-test"
     } ]
   }, {
     "failure-counts" : {
@@ -4865,7 +3968,7 @@
       "sha" : null
     },
     "schema-version" : 1,
-    "recorded-at" : "2026-10-13T02:04:38.115026142Z",
+    "recorded-at" : "2026-10-31T12:47:39.719881014Z",
     "spec" : null,
     "workflow-name" : "local",
     "status" : "success",
@@ -4904,7 +4007,7 @@
       "sha" : null
     },
     "schema-version" : 1,
-    "recorded-at" : "2026-10-13T02:02:58.827409726Z",
+    "recorded-at" : "2026-10-31T12:48:32.708329526Z",
     "spec" : null,
     "workflow-name" : "local",
     "status" : "failure",
@@ -6394,7 +5497,7 @@
   }, {
     "failure-counts" : {
       "errored" : 0,
-      "throw" : 14,
+      "throw" : 9,
       "timeout" : 0,
       "failed" : 0
     },
@@ -6406,10 +5509,10 @@
     },
     "workflow-key" : "local",
     "tests" : {
-      "passed" : 144,
+      "passed" : 149,
       "skipped" : 0,
       "errored" : 0,
-      "throw" : 14,
+      "throw" : 9,
       "timeout" : 0,
       "failed" : 0
     },
@@ -6420,7 +5523,7 @@
       "sha" : null
     },
     "schema-version" : 1,
-    "recorded-at" : "2026-10-13T01:55:47.200750021Z",
+    "recorded-at" : "2026-10-31T12:45:25.945139083Z",
     "spec" : null,
     "workflow-name" : "local",
     "status" : "failure",
@@ -6428,79 +5531,8 @@
     "kind" : "xtbench-job",
     "metrics-status" : "complete",
     "suite" : "xt.event",
-    "failing-count" : 14,
+    "failing-count" : 9,
     "failures" : [ {
-      "runtime-namespace" : "xtbench.python.event.base-animate-test",
-      "counts" : {
-        "throw" : 3
-      },
-      "functions" : [ {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.event.base-animate/get-map-input",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/python/event/base_animate_test.clj",
-          "type" : "throw",
-          "line" : 158,
-          "count" : 1
-        } ]
-      }, {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.event.base-animate/listen-map",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/python/event/base_animate_test.clj",
-          "type" : "throw",
-          "line" : 170,
-          "count" : 1
-        } ]
-      }, {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.event.base-animate/new-derived",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/python/event/base_animate_test.clj",
-          "type" : "throw",
-          "line" : 30,
-          "count" : 1
-        } ]
-      } ],
-      "namespace-errors" : [ ],
-      "namespace" : "event.base-animate-test"
-    }, {
-      "runtime-namespace" : "xtbench.python.event.base-box-test",
-      "counts" : {
-        "throw" : 2
-      },
-      "functions" : [ {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.event.base-box/reset-data",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/python/event/base_box_test.clj",
-          "type" : "throw",
-          "line" : 114,
-          "count" : 1
-        } ]
-      }, {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.event.base-box/set-data",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/python/event/base_box_test.clj",
-          "type" : "throw",
-          "line" : 82,
-          "count" : 1
-        } ]
-      } ],
-      "namespace-errors" : [ ],
-      "namespace" : "event.base-box-test"
-    }, {
       "runtime-namespace" : "xtbench.python.event.base-route-test",
       "counts" : {
         "throw" : 1
@@ -6607,132 +5639,6 @@
   }, {
     "failure-counts" : {
       "errored" : 0,
-      "throw" : 3,
-      "timeout" : 0,
-      "failed" : 2
-    },
-    "run" : {
-      "number" : null,
-      "id" : null,
-      "url" : null,
-      "attempt" : 1
-    },
-    "workflow-key" : "local",
-    "tests" : {
-      "passed" : 564,
-      "skipped" : 0,
-      "errored" : 0,
-      "throw" : 3,
-      "timeout" : 0,
-      "failed" : 2
-    },
-    "generated-count" : 22,
-    "git" : {
-      "ref" : null,
-      "event" : null,
-      "sha" : null
-    },
-    "schema-version" : 1,
-    "recorded-at" : "2026-10-13T02:07:18.894640662Z",
-    "spec" : null,
-    "workflow-name" : "local",
-    "status" : "failure",
-    "language" : "dart",
-    "kind" : "xtbench-job",
-    "metrics-status" : "complete",
-    "suite" : "xt.lang",
-    "failing-count" : 5,
-    "failures" : [ {
-      "runtime-namespace" : "xtbench.dart.lang.common-color-test",
-      "counts" : {
-        "failed" : 1
-      },
-      "functions" : [ {
-        "counts" : {
-          "failed" : 1
-        },
-        "function" : "xt.lang.common-color/rgb->hsl",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/dart/lang/common_color_test.clj",
-          "type" : "failed",
-          "line" : 77,
-          "count" : 1
-        } ]
-      } ],
-      "namespace-errors" : [ ],
-      "namespace" : "lang.common-color-test"
-    }, {
-      "runtime-namespace" : "xtbench.dart.lang.spec-base-test",
-      "counts" : {
-        "throw" : 1
-      },
-      "functions" : [ {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.lang.spec-base/x:del",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/dart/lang/spec_base_test.clj",
-          "type" : "throw",
-          "line" : 200,
-          "count" : 1
-        } ]
-      } ],
-      "namespace-errors" : [ ],
-      "namespace" : "lang.spec-base-test"
-    }, {
-      "runtime-namespace" : "xtbench.dart.lang.spec-link-test",
-      "counts" : {
-        "failed" : 1
-      },
-      "functions" : [ {
-        "counts" : {
-          "failed" : 1
-        },
-        "function" : "xt.lang.spec-link/x:socket-send",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/dart/lang/spec_link_test.clj",
-          "type" : "failed",
-          "line" : 36,
-          "count" : 1
-        } ]
-      } ],
-      "namespace-errors" : [ ],
-      "namespace" : "lang.spec-link-test"
-    }, {
-      "runtime-namespace" : "xtbench.dart.lang.spec-os-test",
-      "counts" : {
-        "throw" : 2
-      },
-      "functions" : [ {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.lang.spec-os/x:file-read",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/dart/lang/spec_os_test.clj",
-          "type" : "throw",
-          "line" : 53,
-          "count" : 1
-        } ]
-      }, {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.lang.spec-os/x:file-write",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/dart/lang/spec_os_test.clj",
-          "type" : "throw",
-          "line" : 63,
-          "count" : 1
-        } ]
-      } ],
-      "namespace-errors" : [ ],
-      "namespace" : "lang.spec-os-test"
-    } ]
-  }, {
-    "failure-counts" : {
-      "errored" : 0,
       "throw" : 30,
       "timeout" : 0,
       "failed" : 541
@@ -6759,7 +5665,7 @@
       "sha" : null
     },
     "schema-version" : 1,
-    "recorded-at" : "2026-10-13T02:03:44.163637799Z",
+    "recorded-at" : "2026-10-31T12:55:35.324813176Z",
     "spec" : null,
     "workflow-name" : "local",
     "status" : "failure",
@@ -13116,7 +12022,7 @@
   }, {
     "failure-counts" : {
       "errored" : 0,
-      "throw" : 45,
+      "throw" : 43,
       "timeout" : 0,
       "failed" : 0
     },
@@ -13128,10 +12034,10 @@
     },
     "workflow-key" : "local",
     "tests" : {
-      "passed" : 527,
+      "passed" : 529,
       "skipped" : 0,
       "errored" : 0,
-      "throw" : 45,
+      "throw" : 43,
       "timeout" : 0,
       "failed" : 0
     },
@@ -13142,7 +12048,7 @@
       "sha" : null
     },
     "schema-version" : 1,
-    "recorded-at" : "2026-10-13T02:00:07.268452690Z",
+    "recorded-at" : "2026-10-31T12:49:47.593789896Z",
     "spec" : null,
     "workflow-name" : "local",
     "status" : "failure",
@@ -13150,7 +12056,7 @@
     "kind" : "xtbench-job",
     "metrics-status" : "complete",
     "suite" : "xt.lang",
-    "failing-count" : 45,
+    "failing-count" : 43,
     "failures" : [ {
       "runtime-namespace" : "xtbench.python.lang.common-color-test",
       "counts" : {
@@ -13195,7 +12101,7 @@
     }, {
       "runtime-namespace" : "xtbench.python.lang.common-data-test",
       "counts" : {
-        "throw" : 2
+        "throw" : 1
       },
       "functions" : [ {
         "counts" : {
@@ -13206,17 +12112,6 @@
           "path" : "test-lang/xtbench/python/lang/common_data_test.clj",
           "type" : "throw",
           "line" : 766,
-          "count" : 1
-        } ]
-      }, {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.lang.common-data/set-in",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/python/lang/common_data_test.clj",
-          "type" : "throw",
-          "line" : 417,
           "count" : 1
         } ]
       } ],
@@ -13693,25 +12588,6 @@
       } ],
       "namespace-errors" : [ ],
       "namespace" : "lang.spec-base-test"
-    }, {
-      "runtime-namespace" : "xtbench.python.lang.spec-primitive-test",
-      "counts" : {
-        "throw" : 1
-      },
-      "functions" : [ {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.lang.spec-primitive/!:G",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/python/lang/spec_primitive_test.clj",
-          "type" : "throw",
-          "line" : 21,
-          "count" : 1
-        } ]
-      } ],
-      "namespace-errors" : [ ],
-      "namespace" : "lang.spec-primitive-test"
     } ]
   }, {
     "failure-counts" : {
@@ -13742,7 +12618,7 @@
       "sha" : null
     },
     "schema-version" : 1,
-    "recorded-at" : "2026-10-13T01:59:23.239310692Z",
+    "recorded-at" : "2026-10-31T12:49:56.218483051Z",
     "spec" : null,
     "workflow-name" : "local",
     "status" : "success",
@@ -13781,7 +12657,7 @@
       "sha" : null
     },
     "schema-version" : 1,
-    "recorded-at" : "2026-10-13T01:54:58.565191781Z",
+    "recorded-at" : "2026-10-31T12:50:00.051567696Z",
     "spec" : null,
     "workflow-name" : "local",
     "status" : "success",
@@ -13820,7 +12696,7 @@
       "sha" : null
     },
     "schema-version" : 1,
-    "recorded-at" : "2026-10-13T01:57:02.359241997Z",
+    "recorded-at" : "2026-10-31T12:45:02.719848388Z",
     "spec" : null,
     "workflow-name" : "local",
     "status" : "success",
@@ -13859,7 +12735,7 @@
       "sha" : null
     },
     "schema-version" : 1,
-    "recorded-at" : "2026-10-13T01:58:13.507497052Z",
+    "recorded-at" : "2026-10-31T12:51:20.794734839Z",
     "spec" : null,
     "workflow-name" : "local",
     "status" : "failure",
@@ -13936,7 +12812,7 @@
       "sha" : null
     },
     "schema-version" : 1,
-    "recorded-at" : "2026-10-13T02:04:34.653242273Z",
+    "recorded-at" : "2026-10-31T12:48:44.560119158Z",
     "spec" : null,
     "workflow-name" : "local",
     "status" : "failure",
@@ -16774,9 +15650,9 @@
   }, {
     "failure-counts" : {
       "errored" : 0,
-      "throw" : 18,
+      "throw" : 1,
       "timeout" : 0,
-      "failed" : 0
+      "failed" : 1
     },
     "run" : {
       "number" : null,
@@ -16786,12 +15662,12 @@
     },
     "workflow-key" : "local",
     "tests" : {
-      "passed" : 229,
+      "passed" : 245,
       "skipped" : 0,
       "errored" : 0,
-      "throw" : 18,
+      "throw" : 1,
       "timeout" : 0,
-      "failed" : 0
+      "failed" : 1
     },
     "generated-count" : 22,
     "git" : {
@@ -16800,7 +15676,7 @@
       "sha" : null
     },
     "schema-version" : 1,
-    "recorded-at" : "2026-10-13T02:02:09.394568125Z",
+    "recorded-at" : "2026-10-31T12:53:07.153488410Z",
     "spec" : null,
     "workflow-name" : "local",
     "status" : "failure",
@@ -16808,7 +15684,7 @@
     "kind" : "xtbench-job",
     "metrics-status" : "complete",
     "suite" : "xt.substrate",
-    "failing-count" : 18,
+    "failing-count" : 2,
     "failures" : [ {
       "runtime-namespace" : "xtbench.python.substrate.base-util-test",
       "counts" : {
@@ -16829,235 +15705,27 @@
       "namespace-errors" : [ ],
       "namespace" : "substrate.base-util-test"
     }, {
-      "runtime-namespace" : "xtbench.python.substrate.page-core-test",
-      "counts" : {
-        "throw" : 11
-      },
-      "functions" : [ {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.substrate.page-core/get-unknown-deps",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/python/substrate/page_core_test.clj",
-          "type" : "throw",
-          "line" : 335,
-          "count" : 1
-        } ]
-      }, {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.substrate.page-core/group-get-dependents",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/python/substrate/page_core_test.clj",
-          "type" : "throw",
-          "line" : 182,
-          "count" : 1
-        } ]
-      }, {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.substrate.page-core/group-remove",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/python/substrate/page_core_test.clj",
-          "type" : "throw",
-          "line" : 440,
-          "count" : 1
-        } ]
-      }, {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.substrate.page-core/group-update",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/python/substrate/page_core_test.clj",
-          "type" : "throw",
-          "line" : 525,
-          "count" : 1
-        } ]
-      }, {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.substrate.page-core/model-get-dependents",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/python/substrate/page_core_test.clj",
-          "type" : "throw",
-          "line" : 156,
-          "count" : 1
-        } ]
-      }, {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.substrate.page-core/model-refresh-dependents",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/python/substrate/page_core_test.clj",
-          "type" : "throw",
-          "line" : 225,
-          "count" : 1
-        } ]
-      }, {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.substrate.page-core/model-refresh-dependents-unthrottled",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/python/substrate/page_core_test.clj",
-          "type" : "throw",
-          "line" : 287,
-          "count" : 1
-        } ]
-      }, {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.substrate.page-core/model-remove",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/python/substrate/page_core_test.clj",
-          "type" : "throw",
-          "line" : 481,
-          "count" : 1
-        } ]
-      }, {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.substrate.page-core/model-set-input",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/python/substrate/page_core_test.clj",
-          "type" : "throw",
-          "line" : 565,
-          "count" : 1
-        } ]
-      }, {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.substrate.page-core/model-trigger",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/python/substrate/page_core_test.clj",
-          "type" : "throw",
-          "line" : 649,
-          "count" : 1
-        } ]
-      }, {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.substrate.page-core/model-update",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/python/substrate/page_core_test.clj",
-          "type" : "throw",
-          "line" : 548,
-          "count" : 1
-        } ]
-      } ],
-      "namespace-errors" : [ ],
-      "namespace" : "substrate.page-core-test"
-    }, {
-      "runtime-namespace" : "xtbench.python.substrate.page-proxy-test",
-      "counts" : {
-        "throw" : 3
-      },
-      "functions" : [ {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.substrate.page-proxy/group-close-proxy",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/python/substrate/page_proxy_test.clj",
-          "type" : "throw",
-          "line" : 210,
-          "count" : 1
-        } ]
-      }, {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.substrate.page-proxy/group-sync-proxy",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/python/substrate/page_proxy_test.clj",
-          "type" : "throw",
-          "line" : 780,
-          "count" : 1
-        } ]
-      }, {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.substrate.page-proxy/model-handle-update",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/python/substrate/page_proxy_test.clj",
-          "type" : "throw",
-          "line" : 446,
-          "count" : 1
-        } ]
-      } ],
-      "namespace-errors" : [ ],
-      "namespace" : "substrate.page-proxy-test"
-    }, {
-      "runtime-namespace" : "xtbench.python.substrate.page-util-test",
-      "counts" : {
-        "throw" : 1
-      },
-      "functions" : [ {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.substrate.page-util/get-group-deps",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/python/substrate/page_util_test.clj",
-          "type" : "throw",
-          "line" : 117,
-          "count" : 1
-        } ]
-      } ],
-      "namespace-errors" : [ ],
-      "namespace" : "substrate.page-util-test"
-    }, {
       "runtime-namespace" : "xtbench.python.substrate.walkthrough.s06-page-test",
       "counts" : {
-        "throw" : 1
+        "failed" : 1
       },
       "functions" : [ {
         "counts" : {
-          "throw" : 1
+          "failed" : 1
         },
         "function" : "xt.substrate.walkthrough.s06-page-test/demo-002-page-model-dependency",
         "locations" : [ {
           "path" : "test-lang/xtbench/python/substrate/walkthrough/s06_page_test.clj",
-          "type" : "throw",
+          "type" : "failed",
           "line" : 106,
           "count" : 1
         } ]
       } ],
       "namespace-errors" : [ ],
       "namespace" : "substrate.walkthrough.s06-page-test"
-    }, {
-      "runtime-namespace" : "xtbench.python.substrate.walkthrough.s07-wsserver-test",
-      "counts" : {
-        "throw" : 1
-      },
-      "functions" : [ {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.substrate.walkthrough.s07-wsserver-test/websocket-roundtrip",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/python/substrate/walkthrough/s07_wsserver_test.clj",
-          "type" : "throw",
-          "line" : 91,
-          "count" : 1
-        } ]
-      } ],
-      "namespace-errors" : [ ],
-      "namespace" : "substrate.walkthrough.s07-wsserver-test"
     } ]
   } ],
-  "recorded-at" : "2026-10-13T02:10:43.544394768Z",
+  "recorded-at" : "2026-10-31T13:01:06.246262601Z",
   "workflow-name" : "XTBench Core",
   "status" : "failure",
   "kind" : "xtbench-run",
