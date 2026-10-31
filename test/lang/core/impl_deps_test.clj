@@ -1,4 +1,4 @@
-4(ns lang.core.impl-deps-test
+(ns lang.core.impl-deps-test
   (:require [lang.base.emit-prep-lua-test :as prep]
             [lang.core.impl :as impl]
             [lang.core.impl-deps :as deps]
@@ -134,7 +134,25 @@
                                 {:native {'cjson "cjson"
                                           'lustache "lustache"}}]
                                {})
-  => '{cjson "cjson", lustache "lustache"})
+  => '{cjson "cjson", lustache "lustache"}
+
+  (deps/collect-script-natives
+   '[{:id first.ui :native {"icons" {:as #{Sun Moon} :type :module}}}
+     {:id second.ui :native {"icons" {:as #{Moon Menu} :type :module}}}]
+   {})
+  => '{"icons" {:as #{Sun Moon Menu} :type :module}}
+
+  (deps/collect-script-natives
+   '[{:native {"react" {:as React}}}
+     {:native {"react" {:as OtherReact}}}]
+   {})
+  => (throws-info {:key "react"})
+
+  (deps/collect-script-natives
+   '[{:native {"icons" {:as #{Sun} :type :module}}}
+     {:native {"icons" {:as #{Moon} :type :commonjs}}}]
+   {})
+  => (throws-info {:key "icons"}))
 
 ^{:refer lang.core.impl-deps/collect-script-entries :added "4.0"}
 (fact "collects all entries"

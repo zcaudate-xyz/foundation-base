@@ -20,18 +20,23 @@
 
 (defn- playwright-browser-paths
   []
-  (let [root (io/file (System/getProperty "user.home")
-                      ".cache"
-                      "ms-playwright")]
-    (if (.exists root)
-      (->> (file-seq root)
-           (filter #(.isFile ^java.io.File %))
-           (map #(.getAbsolutePath ^java.io.File %))
-           (filter (fn [path]
-                     (or (.endsWith path "/chrome")
-                         (.endsWith path "/chrome-headless-shell"))))
-           sort)
-      [])))
+  (let [home (System/getProperty "user.home")
+        roots (keep identity [(System/getenv "PLAYWRIGHT_BROWSERS_PATH")
+                              (str home "/.cache/ms-playwright")
+                              (str home "/Library/Caches/ms-playwright")])]
+    (->> roots
+         (map io/file)
+         (filter #(.isDirectory ^java.io.File %))
+         (mapcat file-seq)
+         (filter #(.isFile ^java.io.File %))
+         (map #(.getAbsolutePath ^java.io.File %))
+         (filter (fn [path]
+                   (or (.endsWith path "/chrome")
+                       (.endsWith path "/chrome-headless-shell")
+                       (.endsWith path "/Contents/MacOS/Google Chrome for Testing")
+                       (.endsWith path "/Contents/MacOS/Chromium"))))
+         distinct
+         sort)))
 
 (defn- resolve-chrome
   []

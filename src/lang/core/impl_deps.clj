@@ -96,6 +96,11 @@
                                  (= ov v)
                                  out
 
+                                 (and (map? ov) (map? v)
+                                      (set? (:as ov)) (set? (:as v))
+                                      (= (dissoc ov :as) (dissoc v :as)))
+                                 (assoc out k (update ov :as set/union (:as v)))
+
                                  :else
                                  (f/error "Imports not of the same name"
                                           {:ns   id
