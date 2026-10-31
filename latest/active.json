@@ -6,10 +6,10 @@
     "errored" : 2
   },
   "run" : {
-    "id" : 41202298932,
-    "number" : 163,
+    "id" : 41203437448,
+    "number" : 164,
     "attempt" : 1,
-    "url" : "https://github.com/zcaudate-xyz/foundation-base/actions/runs/41202298932"
+    "url" : "https://github.com/zcaudate-xyz/foundation-base/actions/runs/41203437448"
   },
   "workflow-key" : "active",
   "tests" : {
@@ -21,7 +21,7 @@
     "errored" : 2
   },
   "git" : {
-    "sha" : "33e9e268aeda9411f1df0c1f783a3935f9ce3f5e",
+    "sha" : "f60ecc0c30247190fd3a1ea86973563c8f9501ac",
     "ref" : "refs/heads/main",
     "event" : "push"
   },
@@ -55,7 +55,7 @@
       "sha" : null
     },
     "schema-version" : 1,
-    "recorded-at" : "2026-10-31T12:53:13.922646330Z",
+    "recorded-at" : "2026-10-31T13:13:13.372271479Z",
     "spec" : null,
     "workflow-name" : "local",
     "status" : "failure",
@@ -400,7 +400,7 @@
       "sha" : null
     },
     "schema-version" : 1,
-    "recorded-at" : "2026-10-31T12:47:27.157909948Z",
+    "recorded-at" : "2026-10-31T13:08:29.091384185Z",
     "spec" : null,
     "workflow-name" : "local",
     "status" : "failure",
@@ -785,7 +785,7 @@
       "sha" : null
     },
     "schema-version" : 1,
-    "recorded-at" : "2026-10-31T12:47:17.042635246Z",
+    "recorded-at" : "2026-10-31T13:10:39.291725683Z",
     "spec" : null,
     "workflow-name" : "local",
     "status" : "failure",
@@ -1436,7 +1436,7 @@
       "sha" : null
     },
     "schema-version" : 1,
-    "recorded-at" : "2026-10-31T12:56:36.645566439Z",
+    "recorded-at" : "2026-10-31T13:11:42.340930999Z",
     "spec" : null,
     "workflow-name" : "local",
     "status" : "failure",
@@ -2520,7 +2520,7 @@
       "namespace" : "substrate.walkthrough.s07-wsserver-test"
     } ]
   } ],
-  "recorded-at" : "2026-10-31T13:02:30.496034676Z",
+  "recorded-at" : "2026-10-31T13:44:23.062614451Z",
   "workflow-name" : "XTBench Active",
   "status" : "failure",
   "kind" : "xtbench-run",
