@@ -6,10 +6,10 @@
     "errored" : 0
   },
   "run" : {
-    "id" : 41203437454,
-    "number" : 187,
+    "id" : 42922413572,
+    "number" : 188,
     "attempt" : 1,
-    "url" : "https://github.com/zcaudate-xyz/foundation-base/actions/runs/41203437454"
+    "url" : "https://github.com/zcaudate-xyz/foundation-base/actions/runs/42922413572"
   },
   "workflow-key" : "annex",
   "tests" : {
@@ -21,7 +21,7 @@
     "errored" : 0
   },
   "git" : {
-    "sha" : "f60ecc0c30247190fd3a1ea86973563c8f9501ac",
+    "sha" : "88834b2736b117d420b79f0a822942dc8086d591",
     "ref" : "refs/heads/main",
     "event" : "push"
   },
@@ -55,7 +55,7 @@
       "sha" : null
     },
     "schema-version" : 1,
-    "recorded-at" : "2026-10-31T12:59:57.192216927Z",
+    "recorded-at" : "2026-11-10T23:20:54.165557658Z",
     "spec" : null,
     "workflow-name" : "local",
     "status" : "failure",
@@ -4707,7 +4707,7 @@
       "sha" : null
     },
     "schema-version" : 1,
-    "recorded-at" : "2026-10-31T12:59:22.358973464Z",
+    "recorded-at" : "2026-11-10T23:20:46.896794604Z",
     "spec" : null,
     "workflow-name" : "local",
     "status" : "failure",
@@ -6529,7 +6529,7 @@
       "sha" : null
     },
     "schema-version" : 1,
-    "recorded-at" : "2026-10-31T12:59:56.370579172Z",
+    "recorded-at" : "2026-11-10T23:21:23.865692279Z",
     "spec" : null,
     "workflow-name" : "local",
     "status" : "failure",
@@ -10266,7 +10266,7 @@
       "sha" : null
     },
     "schema-version" : 1,
-    "recorded-at" : "2026-10-31T13:01:48.661700940Z",
+    "recorded-at" : "2026-11-10T23:23:10.635188970Z",
     "spec" : null,
     "workflow-name" : "local",
     "status" : "failure",
@@ -13448,7 +13448,7 @@
       "namespace" : "lang.spec-promise-test"
     } ]
   } ],
-  "recorded-at" : "2026-10-31T13:04:07.507428872Z",
+  "recorded-at" : "2026-11-10T23:25:13.727276257Z",
   "workflow-name" : "XTBench Annex",
   "status" : "failure",
   "kind" : "xtbench-run",
