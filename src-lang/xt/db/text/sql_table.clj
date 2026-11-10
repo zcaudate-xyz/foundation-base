@@ -47,7 +47,7 @@
   (var ks    (xt/x:arr-filter cols (fn:> [col]
                                          (xt/x:has-key? m col))))
   (return (raw/raw-upsert table-name
-                          "id"
+                          (base-schema/primary-columns schema table-name)
                           ks
                           [m]
                           opts)))
@@ -57,6 +57,7 @@
   {:added "4.0"}
   [entry]
   (return (not (and (== 0 (xt/x:len (xt/x:obj-keys (. entry ["ref_links"]))))
+                    (xt/x:has-key? (. entry ["data"]) "id")
                     (== 1 (xt/x:len (xt/x:obj-keys (. entry ["data"]))))))))
 
 (defn.xt table-get-data
@@ -75,7 +76,7 @@
   table-emit-upsert
   (fn [table-name cols out opts]
     (return (raw/raw-upsert table-name
-                            "id"
+                            (or (. opts ["identity_columns"]) "id")
                             cols
                             out
                             opts))))
@@ -110,6 +111,7 @@
                                                  (column-fn update-key))}
                                       opts))
            (:= sopts (xt/x:obj-clone opts)))
+         (xt/x:set-key sopts "identity_columns" (base-schema/primary-columns schema table-name))
          (when (< 0 (xt/x:len sout))
            (return (emit-fn table-name
                             cols

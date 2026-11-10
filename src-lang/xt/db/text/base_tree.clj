@@ -160,12 +160,23 @@
   (var qtree (-/tree-fill-input itree args (xt/x:arr-clone input) true))
   (return qtree))
 
+(defn.xt return-input
+  "Returns non-identity arguments for a return entry, including composite keys."
+  [entry]
+  (var input (xt/x:arr-clone (. entry ["input"])))
+  (var identity (xt/x:get-path entry ["view" "identity"]))
+  (var count (:? (xt/x:is-array? identity) (xt/x:len identity) 1))
+  (while (and (> count 0) (> (xt/x:len input) 0))
+    (xt/x:arr-pop-first input)
+    (:= count (- count 1)))
+  (return input))
+
 (defn.xt plan-combined
   "provides a view combine query"
   {:added "4.0"}
   [schema sel-entry sel-args ret-entry ret-args ret-omit opts as-tree]
   (var sel-input  (. sel-entry ["input"]))
-  (var ret-input  (. ret-entry ["input"]))
+  (var ret-input  (-/return-input ret-entry))
   (var itree   (-/tree-combined schema
                                 sel-entry
                                 ret-entry
@@ -177,7 +188,7 @@
                                      (xt/x:arr-assign sel-args))
                                  (-> (xt/x:arr-clone  ret-input)
                                      (xt/x:arr-assign sel-input))
-                                 (:? (> (xt/x:len ret-input) 0) true false)))
+                                 false))
   (return qtree))
 
 
@@ -191,8 +202,7 @@
   [entry args drop-first]
   (var targs (. entry ["input"]))
   (when drop-first
-    (:= targs [(xt/x:unpack targs)])
-    (x:arr-pop-first targs))
+    (:= targs (-/return-input entry)))
   (var l-ok-value (check/check-args-length args targs))
   (var [l-ok l-err] l-ok-value)
   (when (not l-ok)

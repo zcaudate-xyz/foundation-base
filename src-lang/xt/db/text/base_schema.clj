@@ -3,7 +3,8 @@
 
 (l/script :xtalk
   {:require [[xt.lang.spec-base :as xt]
-             [xt.lang.common-data :as xtd]]})
+             [xt.lang.common-data :as xtd]
+             [xt.lang.common-string :as str]]})
 
 (def.xt CACHED_SCHEMA (xt/x:lu-create))
 
@@ -22,6 +23,34 @@
   (return (:? (== "ref" (. e ["type"]))
               (xt/x:cat (. e ["ident"]) "_id")
               (. e ["ident"]))))
+
+(defn.xt primary-columns
+  "Returns ordered physical primary-key columns, including reference ids."
+  [schema table-name]
+  (var table (xt/x:get-key schema table-name))
+  (var entries (-> (xt/x:obj-vals table)
+                  (xt/x:arr-filter (fn:> [entry] (. entry ["primary"])))
+                  (xt/x:arr-sort -/get-order xt/x:lt)))
+  (return (:? (> (xt/x:len entries) 0)
+              (xt/x:arr-map entries -/get-ident-id)
+              ["id"])))
+
+(defn.xt record-key
+  "Indexes composite rows without adding a fictitious id to their data."
+  [schema table-name data]
+  (var values (xt/x:arr-map (-/primary-columns schema table-name)
+                           (fn [column]
+                             (var value (xt/x:get-key data column))
+                             (when (and (xt/x:nil? value)
+                                        (str/ends-with? column "_id"))
+                               (var field (xt/x:str-substring column (xt/x:offset 0) (xt/x:offset (- (xt/x:str-len column) 3))))
+                               (:= value (xt/x:get-key data field))
+                               (when (xt/x:is-object? value)
+                                 (:= value (xt/x:get-key value "id"))))
+                             (return value))))
+  (return (:? (== (xt/x:len values) 1)
+              (xt/x:first values)
+              (xt/x:json-encode values))))
 
 (defn.xt list-tables
   "list tables"

@@ -26,11 +26,11 @@
                              (xtd/obj-from-pairs))
                          nil)))))
 
-(defn.xt flatten-merge
+(defn.xt flatten-merge-key
   "flatten data"
   {:added "4.0"}
-  [table-map data-obj ref-links rev-links]
-  (var #{id} := data-obj)
+  [table-map data-obj ref-links rev-links record-id]
+  (var id (:? (xt/x:nil? record-id) (. data-obj ["id"]) record-id))
   (var rec := (xt/x:get-key table-map id))
   (when (not (xt/x:is-object? rec))
     (:= rec {:id id
@@ -42,6 +42,11 @@
   (xtd/swap-key rec "ref_links" xtd/obj-assign-with [ref-links xt/x:obj-assign])
   (xtd/swap-key rec "rev_links" xtd/obj-assign-with [rev-links xt/x:obj-assign])
   (return table-map))
+
+(defn.xt flatten-merge
+  "Merges a row using its conventional id."
+  [table-map data-obj ref-links rev-links]
+  (return (-/flatten-merge-key table-map data-obj ref-links rev-links (. data-obj ["id"]))))
 
 (defn.xt flatten-node
   "flatten node"
@@ -65,10 +70,11 @@
   (xt/for:object [[id-k k] ref-id-map]
             (if (xt/x:is-string? (xt/x:get-key data id-k))
               (xt/x:set-key ref-id-links k {(xt/x:get-key data id-k) true})))
-  (-/flatten-merge table-map
+  (-/flatten-merge-key table-map
                    data-obj
                    (xtd/obj-assign-with ref-links ref-id-links xt/x:obj-assign)
-                   rev-links)
+                   rev-links
+                   (sch/record-key schema table-name data))
   (return {:table-map table-map
            :data-obj data-obj
            :ref-obj ref-obj
