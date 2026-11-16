@@ -1,4 +1,9 @@
-{xyz.zcaudate/code.mcp
+{xyz.zcaudate/app.manage
+ {:description "Clojure application builds, integration checks, watching and management UI"
+  :include [[app.manage :complete]]
+  :bundle [{:path "resources" :include ["assets/app.manage"]}]}
+
+ xyz.zcaudate/code.mcp
  {:description "java-sdk MCP wrappers and RAG scaffolding"
   :include [[code.mcp :complete]]
   :dependencies [io.modelcontextprotocol.sdk/mcp]}
