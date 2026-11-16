@@ -122,9 +122,9 @@
       (return (+ "<details class=\"page-definition\"><summary><strong>" (-/escapeText page.id)
         "</strong> <code>" (-/escapeText (. (or page.routes []) (join ", "))) "</code> · " (-/escapeText page.area) "</summary>"
         "<p class=\"muted\">" (-/escapeText page.runtime) "</p>"
-        (:? page.migration (+ "<p class=\"migration-status\">Migration group: <strong>" (-/escapeText page.migration.group)
+        (:? page.migration (+ "<div class=\"migration-status\">Migration group: <strong>" (-/escapeText page.migration.group)
           "</strong> · " (-/escapeText (-/statusLabel page.migration.status)) " · " page.migration.required " required capabilities · "
-          (. page.migration ["native-contracts"]) " native contracts<p>" (-/escapeText page.migration.blocker) "</p>") "")
+          (. page.migration ["native-contracts"]) " native contracts<p>" (-/escapeText page.migration.blocker) "</p></div>") "")
         "<h3>Models</h3>"
         (. (. (Object.entries (or page.models {})) (map (fn [pair]
           (return (+ "<details class=\"model-definition\"><summary>" (-/escapeText (. pair [0])) " · "
