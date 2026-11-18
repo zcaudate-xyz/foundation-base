@@ -22,7 +22,7 @@
        (fn [ident]
           (return (xt/x:cat (column-fn ident)
                          " " (:? (== "ref" stype) "text" stype)
-                         (:? (== true iprimary) " PRIMARY KEY" "")
+                         (:? (and (== true iprimary) (not (. opts ["composite_primary"]))) " PRIMARY KEY" "")
                          (:? (and (== true irequired)
                                   (== true strict))
                              " NOT NULL"
@@ -52,12 +52,19 @@
   ([schema table-name opts]
    (var table-fn         (xt/x:get-key opts "table_fn" (fn [x] (return x))))
    (var columns (base-schema/table-entries schema table-name))
+   (var identity (base-schema/primary-columns schema table-name))
+   (var composite (> (xt/x:len identity) 1))
+   (var column-fn (xt/x:get-key opts "column_fn" (fn [x] (return x))))
+   (var column-opts (xt/x:obj-assign (xt/x:obj-clone opts) {"composite_primary" composite}))
    (return (xt/x:cat "CREATE TABLE IF NOT EXISTS "
                   (table-fn table-name)
                   " (\n  " 
                   (xt/x:str-join ",\n  " (xt/x:arr-map columns
                                              (fn [e]
-                                               (return (-/table-create-column schema e opts)))))
+                                               (return (-/table-create-column schema e column-opts)))))
+                  (:? composite
+                      (xt/x:cat ",\n  PRIMARY KEY (" (xt/x:str-join "," (xt/x:arr-map identity column-fn)) ")")
+                      "")
                   "\n);"))))
 
 (defn.xt table-create-all

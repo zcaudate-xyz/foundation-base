@@ -55,10 +55,13 @@
    (var table-fn   (xt/x:get-key opts "table_fn" (fn [x] (return x))))
    (var column-fn  (xt/x:get-key opts "column_fn" (fn [x] (return x))))
    (var #{upsert-clause} opts)
+   (var id-columns (:? (xt/x:is-array? id-column) id-column [id-column]))
+   (var id-lu {})
+   (xt/for:array [column id-columns] (xt/x:set-key id-lu column true))
    (var out-arr (-/raw-insert-array table-name columns values opts))
    (var col-arr (-> columns
                     (xt/x:arr-filter (fn [col]
-                                    (return (not= col id-column))))
+                                    (return (not (xt/x:get-key id-lu col)))))
                     (xt/x:arr-map (fn [col]
                                  (return (xt/x:cat (column-fn col)
                                                 "=coalesce(\"excluded\"."
@@ -68,9 +71,11 @@
                                                 ")"))))))
    (return (xt/x:cat (xt/x:str-join "\n" out-arr)
                   "\n"
-                  (xt/x:cat "ON CONFLICT (" (column-fn id-column) ") DO UPDATE SET\n")
-                  (xt/x:str-join ",\n" col-arr)
-                  (:? (xt/x:is-string? upsert-clause)
+                  (xt/x:cat "ON CONFLICT (" (xt/x:str-join "," (xt/x:arr-map id-columns column-fn)) ") ")
+                  (:? (> (xt/x:len col-arr) 0)
+                      (xt/x:cat "DO UPDATE SET\n" (xt/x:str-join ",\n" col-arr))
+                      "DO NOTHING")
+                  (:? (and (> (xt/x:len col-arr) 0) (xt/x:is-string? upsert-clause))
                       (xt/x:cat "\nWHERE " upsert-clause)
                       "")
                   ";"))))
