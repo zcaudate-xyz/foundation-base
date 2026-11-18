@@ -287,3 +287,65 @@ The CLI replays saved cases through the same executor and exits nonzero on
 failure. FinFolk demonstrates an emitted XTalk worker delegating page/model SDK
 adapters to the actual Substrate backbone, with native PostgreSQL fixtures and
 an ordered ownership scenario.
+
+## Configurable HTTP API
+
+`app.manage.server` serves an opt-in JSON API at `/api/v1`, using its existing
+session token, serialized execution queue, run history and slice evidence. No
+project-specific server wrapper is needed. Existing UI endpoints remain available.
+
+Declare the API on the project map:
+
+```clojure
+:http-api
+{:enabled true
+ :operations ["analyse" "build"]
+ :actions {:verify-ui {:operation "build" :slice "ui" :stage "browser" :tests true}}
+ :artifacts {:report {:path ".cache/ui-report.json" :content-type "application/json"}
+             :screenshots {:directory ".cache/ui" :filename-pattern "failure-[0-9]+[.]png"
+                           :content-type "image/png"}}}
+```
+
+Omit `:http-api` or set `:enabled false` to disable the versioned API. `:operations`
+allows generic submissions through `POST /api/v1/runs`; omit it to expose only the
+fixed named actions in `:actions`. These action maps use the same operation fields
+as `/api/actions`, including target or slice/stage selection. They cannot execute
+arbitrary shell commands supplied over HTTP. Project declarations remain trusted.
+
+Read `/api/session` for the per-process token, then include it as the
+`X-App-Manage-Token` header on every POST. The server binds to loopback and does not
+enable cross-origin browser access. The new configuration applies to `/api/v1`;
+it does not restrict the existing UI `/api/actions` endpoint.
+
+- `GET /api/v1`: discovery.
+- `GET /api/v1/openapi.json`: OpenAPI 3 document derived from project configuration.
+- `GET /api/v1/checks`: check definitions, named actions, in-memory check status and persisted slice evidence.
+- `POST /api/v1/actions/{name}/runs`: submit a fixed configured action; request body is unused.
+- `POST /api/v1/runs`: submit an allowed operation as a JSON object.
+- `GET /api/v1/runs`: recent run history from the shared controller.
+- `GET /api/v1/runs/{id}`: poll a run and read its result and check output.
+- `GET /api/v1/artifacts/{name}`: read a configured file.
+- `GET /api/v1/artifacts/{name}/{filename}`: read a file from a configured directory matching its filename pattern.
+
+POST returns HTTP 202 and `{id, status: "queued"}`. Poll until `status` is `ok` or
+`error`; a failed check is a completed run with `status: "error"`, not an HTTP
+transport error. Run IDs are process-local and recent history is bounded; clients
+should poll promptly and retain completed results. Artifact endpoints serve the
+latest files, so clients must inspect report timestamps rather than assuming the
+file belongs to a particular run. Artifact paths are confined to the project root,
+including symlink resolution. Unknown and disabled endpoints return 404; missing
+or invalid POST tokens return 403.
+
+### Preview links
+
+The classic management frontend gives every declared preview its own hash route:
+`#/previews/<encoded-preview-id>`. Selecting a preview updates the URL; opening
+that link or reloading restores the selected preview. Browser Back and Forward
+restore earlier selections, including navigation between previews and other
+workbench views. The **Preview link** beside the preview controls provides a
+copyable link to the workbench selection. The application URL in the frame is
+unchanged, and periodic status polling preserves the live iframe.
+
+For example, FinFolk's native event preview is `#/previews/native-events` and its
+account preview is `#/previews/native-account`. Existing `?view=previews` links
+remain supported; a hash route takes precedence.

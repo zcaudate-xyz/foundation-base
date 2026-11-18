@@ -5,6 +5,7 @@
             [app.manage.slices :as slices]
             [app.manage.make :as make]
             [app.manage.protocol :as protocol]
+            [app.manage.http-api :as http-api]
             [app.manage.services :as services]
             [app.manage.watch :as watch]
             [clojure.data.json :as json]
@@ -288,6 +289,9 @@
   (try
     (let [uri (.getRequestURI exchange) path (.getPath uri) method (.getRequestMethod exchange)]
       (cond
+        (str/starts-with? path "/api/v1")
+        (http-api/handle! server exchange {:submit! submit! :project-index project-index})
+
         (and (= "GET" method) (or (and (= "/" path) (= :next (:workbench-ui ((:supplier server))))) (str/starts-with? path "/_next/") (str/starts-with? path "/monaco/")))
         (let [name (if (= "/" path) "index.html" (subs path 1))
               manifest (io/resource "assets/app.manage/next/manifest.edn")
