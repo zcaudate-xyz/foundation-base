@@ -87,3 +87,6 @@ packages-gen
 /.lang
 /dart-kernel
 resources/clj-kondo.exports/zcaudate/lang/.cache/v1
+
+# Local compiler and package staging output
+/.cache/
