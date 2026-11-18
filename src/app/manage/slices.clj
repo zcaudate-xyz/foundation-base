@@ -101,18 +101,31 @@
                           (assoc-in [:slices (keyword slice)] {:state state :note note}))]
       (write-state! project path next) next)))
 
+(defn run-command!
+  "Runs one slice command and records evidence; suitable for embedded callers."
+  [project operation slice-id stage-id]
+  (if (or (nil? operation) (= operation "status"))
+    (status project)
+    (let [selected (targets project slice-id stage-id)
+          before (fingerprints project)
+          result (case operation
+                   "generate" (manage/generate project {:targets selected :write true})
+                   "build" (manage/build project {:targets selected})
+                   "check" (manage/check project selected)
+                   (throw (ex-info "Use status, generate, build or check" {})))]
+      (record! project selected result before)
+      result)))
+
 (defn -main [project-var & [operation slice-id stage-id]]
-  (let [project (var-get (requiring-resolve (symbol project-var)))]
-    (try
-      (if (or (nil? operation) (= operation "status"))
-        (prn (status project))
-        (let [selected (targets project slice-id stage-id)
-              before (fingerprints project)
-              result (case operation
-                       "generate" (manage/generate project {:targets selected :write true})
-                       "build" (manage/build project {:targets selected})
-                       "check" (manage/check project selected)
-                       (throw (ex-info "Use status, generate, build or check" {})))]
-          (record! project selected result before)
-          (prn result)))
-      (finally (shutdown-agents)))))
+  (try
+    (let [project (var-get (requiring-resolve (symbol project-var)))
+          result (run-command! project operation slice-id stage-id)]
+      (prn result)
+      (shutdown-agents)
+      ;; Loaded project runtimes can own non-agent pools. A command-line process
+      ;; must terminate after recording its result, as app.manage/-main does.
+      (System/exit (if (= :error (:status result)) 1 0)))
+    (catch Exception error
+      (binding [*out* *err*] (println (.getMessage error)) (prn (ex-data error)))
+      (shutdown-agents)
+      (System/exit 1))))

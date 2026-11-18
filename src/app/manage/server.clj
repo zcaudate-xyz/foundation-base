@@ -5,8 +5,10 @@
             [app.manage.slices :as slices]
             [app.manage.make :as make]
             [app.manage.protocol :as protocol]
+            [app.manage.services :as services]
             [app.manage.watch :as watch]
             [clojure.data.json :as json]
+            [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.string :as str])
   (:import [com.sun.net.httpserver HttpServer HttpHandler]
@@ -51,7 +53,7 @@
                      (for [target targets file (:output-files target)
                            :when (str/ends-with? (:path file) ".html")]
                        {:id (:path file) :label (:path file) :target (:id target) :path (:path file)}))]
-    (mapv (fn [{:keys [id label target path url command]}]
+    (mapv (fn [{:keys [id label target path url command server]}]
             (let [target (when target (name target))
                   owner (some #(when (= target (:id %)) %) targets)]
               (when-not (and id owner (not= (boolean path) (boolean url)))
@@ -67,7 +69,7 @@
                                  (nil? (.getUserInfo uri)))
                     (throw (ex-info "Preview URL must use a loopback HTTP server" {:id id})))))
               {:id (name id) :label (or label (name id)) :target target
-               :url (or url (str "/preview/" path)) :path path :command command
+               :url (or url (str "/preview/" path)) :path path :command command :server (when server (name server))
                :kind (if path :static :server)
                :ready (if path (.isFile (manage/project-file project path)) true)})) declared)))
 
@@ -87,8 +89,10 @@
                            :output-files (file-index project (:outputs target))})) order)]
     {:id (str (:id project)) :root (str (manage/project-root project))
      :pages (when-let [provider (:pages project)] ((if (symbol? provider) (requiring-resolve provider) provider)))
+     :unit-analysis (boolean (:unit-analysis project))
      :targets targets :plan (mapv name (manage/plan project))
      :previews (preview-index project targets)
+     :dev-servers (mapv #(select-keys % [:id :label :url :command]) (services/definitions project))
      :checks (mapv (fn [[key check]] {:id (name key) :targets (mapv name (:targets check))
                                      :command (:command check)}) (sort-by key (:checks project)))}))
 
@@ -136,12 +140,21 @@
 (defn snapshot [server]
   (let [verification (verify/snapshot ((:supplier server)))
         current (slices/status ((:supplier server)))
+        processes (services/snapshot (:services server) ((:supplier server)))
         state (swap! (:state server)
-                     #(if (and (= current (:slices %)) (= verification (:verification %))) % (-> % (assoc :slices current :verification verification) (update :revision inc))))]
+                     #(if (and (= current (:slices %)) (= verification (:verification %)) (= processes (:dev-servers %))) % (-> % (assoc :slices current :verification verification :dev-servers processes) (update :revision inc))))]
+    (let [fingerprint (when (some #(get-in % [:result :fingerprint]) (vals (:runs state)))
+                        (try ((requiring-resolve 'app.manage.units/fingerprint) ((:supplier server)))
+                             (catch Exception _ ::unknown)))]
     (json-value (-> state
                     (assoc :watching (boolean @(:watcher server)))
                     (assoc :verification (verify/snapshot ((:supplier server))))
-                    (assoc :runs (mapv #(get-in state [:runs %]) (reverse (:order state))))))))
+                    (assoc :runs (mapv (fn [id]
+                                        (let [run (get-in state [:runs id])]
+                                          (if-let [recorded (get-in run [:result :fingerprint])]
+                                            (assoc-in run [:result :stale] (or (get-in run [:result :stale]) (not= recorded fingerprint)))
+                                            run)))
+                                      (reverse (:order state)))))))))
 
 (defn- perform! [server {:keys [operation target tests slice stage request] :as action}]
   (let [project ((:supplier server))
@@ -149,6 +162,8 @@
     (when (and target (not (get-in project [:targets (keyword target)])))
       (throw (ex-info "Unknown target" {:target target})))
     (case operation
+      ("server-start" "server-stop" "server-restart") (services/execute! (:services server) project operation (:server request))
+      "run-test-namespaces" ((requiring-resolve 'app.manage.testing/execute!) project request)
       "verify-definitions" (verify/definitions! project)
       "verify-page" (verify/execute! project request)
       "save-page-case" (verify/save! project request)
@@ -261,13 +276,30 @@
         (str/ends-with? path ".json") "application/json; charset=utf-8"
         :else "application/octet-stream"))
 
+(defn- next-policy []
+  (let [html (slurp (io/resource "assets/app.manage/next/index.html"))
+        hashes (for [[_ script] (re-seq #"(?s)<script[^>]*>(.*?)</script>" html)]
+                 (str "'sha256-" (.encodeToString (java.util.Base64/getEncoder)
+                                  (.digest (java.security.MessageDigest/getInstance "SHA-256") (.getBytes script "UTF-8"))) "'"))]
+    (str "default-src 'self'; script-src 'self' " (str/join " " hashes)
+         "; style-src 'self' 'unsafe-inline'; worker-src 'self' blob:; font-src 'self' data:; frame-src 'self' http://127.0.0.1:*; connect-src 'self'; object-src 'none'; frame-ancestors 'self'")))
+
 (defn- handle! [server exchange]
   (try
     (let [uri (.getRequestURI exchange) path (.getPath uri) method (.getRequestMethod exchange)]
       (cond
-        (and (= "GET" method) (= "/" path))
+        (and (= "GET" method) (or (and (= "/" path) (= :next (:workbench-ui ((:supplier server))))) (str/starts-with? path "/_next/") (str/starts-with? path "/monaco/")))
+        (let [name (if (= "/" path) "index.html" (subs path 1))
+              manifest (io/resource "assets/app.manage/next/manifest.edn")
+              allowed (when manifest (set (edn/read-string (slurp manifest))))]
+          (if (and allowed (allowed name))
+            (do (.set (.getResponseHeaders exchange) "Content-Security-Policy" (next-policy))
+                (respond! exchange 200 (mime name) (with-open [in (io/input-stream (io/resource (str "assets/app.manage/next/" name)))] (.readAllBytes in))))
+            (json-response! exchange 404 {:error "Workbench assets have not been built"})))
+
+        (and (= "GET" method) (#{"/" "/legacy"} path))
         (do (.set (.getResponseHeaders exchange) "Content-Security-Policy"
-                  "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'self'; frame-src 'self' http://127.0.0.1:* http://localhost:* http://[::1]:* https://127.0.0.1:* https://localhost:* https://[::1]:*; object-src 'none'; base-uri 'none'; frame-ancestors 'none'")
+                  "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; worker-src 'self' blob:; font-src 'self' data:; connect-src 'self'; frame-src 'self' http://127.0.0.1:* http://localhost:* http://[::1]:* https://127.0.0.1:* https://localhost:* https://[::1]:*; object-src 'none'; base-uri 'none'; frame-ancestors 'self'")
             (respond! exchange 200 "text/html; charset=utf-8"
                       (str "<!doctype html><html lang=\"en\"><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">"
                            "<meta name=\"app-manage-token\" content=\"" (:token server) "\"><title>app.manage</title>"
@@ -278,6 +310,30 @@
         (let [key (subs path 8)]
           (if-let [content (get (:assets server) key)] (respond! exchange 200 (mime key) content)
               (json-response! exchange 404 {:error "Unknown asset"})))
+
+        (and (= "GET" method) (= "/api/session" path))
+        (do (.set (.getResponseHeaders exchange) "Cache-Control" "no-store")
+            (json-response! exchange 200 {:token (:token server) :project (str (manage/project-root ((:supplier server))))}))
+
+        (and (= "GET" method) (= "/api/test-profiles" path))
+        (json-response! exchange 200 ((requiring-resolve 'app.manage.testing/profiles) ((:supplier server))))
+
+        (and (= "GET" method) (= "/api/source" path))
+        (let [project ((:supplier server))
+              path (get (params (.getRawQuery uri)) "path")
+              allowed (set (concat ((requiring-resolve 'app.manage.units/files) project (get-in project [:unit-analysis :sources]))
+                                   ((requiring-resolve 'app.manage.units/files) project (get-in project [:unit-analysis :tests]))))]
+          (when-not (allowed path) (throw (ex-info "File is outside the indexed source/test inventory" {:http-status 403})))
+          (let [file (manage/project-file project path)]
+            (when (> (.length file) 524288) (throw (ex-info "Source file is too large" {:http-status 413})))
+            (json-response! exchange 200 {:path path :language "clojure" :content (slurp file) :fingerprint (str (.lastModified file) ":" (.length file))})))
+
+        (and (= "GET" method) (= "/api/units" path))
+        (let [project ((:supplier server))]
+          (if (:unit-analysis project)
+            (json-response! exchange 200 ((requiring-resolve 'app.manage.units/report)
+                                         project (into {} (map (fn [[k v]] [(keyword k) v]) (params (.getRawQuery uri))))))
+            (json-response! exchange 200 {:enabled false :units []})))
 
         (and (= "GET" method) (= "/api/pages" path))
         (json-response! exchange 200 (get-in @(:state server) [:project :pages]))
@@ -331,6 +387,7 @@
 (defn stop! [server]
   (when (compare-and-set! (:running server) true false)
     (when-let [handle @(:watcher server)] (watch/stop! handle))
+    (services/close! (:services server) ((:supplier server)))
     (when-let [http (:http server)] (.stop ^HttpServer http 0))
     (.shutdownNow ^ExecutorService (:jobs server))
     (.shutdownNow ^ExecutorService (:requests server)))
@@ -348,7 +405,7 @@
     {:supplier supplier :gate (Object.)
      :token (str (UUID/randomUUID)) :running (atom true)
      :jobs (executor 1) :requests (executor 4)
-     :watcher (atom nil) :completions (atom {})
+     :watcher (atom nil) :completions (atom {}) :services (services/controller)
      :state (atom {:revision 0 :project (project-index (supplier)) :active nil
                    :runs {} :order [] :target-status {} :check-status {}})}))
 

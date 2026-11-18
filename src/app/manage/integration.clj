@@ -47,6 +47,11 @@
          (try (stop! fixture) (catch Throwable cleanup (.addSuppressed failure cleanup)))
          (throw failure))))
 
+(defn failure-info [error]
+  (let [causes (vec (take 16 (take-while some? (iterate #(.getCause ^Throwable %) error))))]
+    {:message (or (.getMessage ^Throwable (last causes)) (.getMessage ^Throwable error))
+     :exception (executive/report-edn (Throwable->map error))}))
+
 (defn run!
   "Runs each code.test namespace separately; rejects load/setup errors, skipped and empty suites."
   [namespaces]
@@ -63,9 +68,7 @@
                                                            :skipped])))]
                                {:namespace module :status (if failed? :error :ok) :result result})
                              (catch Throwable error
-                               {:namespace module
-                                :status :error
-                                :message (or (:message (ex-data error)) (.getMessage error))})))
+                               (merge {:namespace module :status :error} (failure-info error)))))
                       namespaces)]
     {:status (if (every? #(= :ok (:status %)) results) :ok :error) :namespaces results}))
 

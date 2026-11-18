@@ -1,5 +1,5 @@
 (ns app.manage.verify-test
-  (:require [app.manage.verify :as v] [app.manage-test :as fixture])
+  (:require [app.manage.verify :as v] [app.manage-test :as fixture] [app.manage.process :as process])
   (:use code.test))
 ^{:refer app.manage.verify/compare-result :added "4.1"}
 (fact "exact null is different from a missing result and errors cannot pass positive checks"
@@ -51,3 +51,22 @@
               [fresh cases-stale ready-after-save edited (boolean (v/ready? p))
                (:status (v/execute! p {:expect {:equals nil}}))]))))))
   => [:passed :stale true false false :blocked])
+
+^{:refer app.manage.verify/-main :id verification-cli-completion :timeout 120000 :added "4.1"}
+(fact "saved-check CLI terminates project threads and returns failed expectations as exit one"
+  (fixture/with-project
+    (fn [p]
+      (mapv
+        (fn [value]
+          (let [script (str "(require '[app.manage.verify :as v]) "
+                           "(def project {:id 'cli :root " (pr-str (:root p))
+                           " :targets {:runtime {:sources [] :outputs []}} :verification-targets [:runtime]"
+                           " :page-verifier (fn [_] {:result " value "})}) "
+                           "(v/save! project {:id \"one\" :revision (:revision (v/cases project)) :case {:expect {:equals 1}}}) "
+                           "(.start (Thread. (fn [] (while true (Thread/sleep 1000))))) "
+                           "(v/-main \"user/project\" \"run\")")
+                result (process/run {:root "." :timeout-ms 45000
+                                     :command [(str (System/getProperty "java.home") "/bin/java")
+                                               "-cp" (System/getProperty "java.class.path") "clojure.main" "-e" script]})]
+            [(:exit result) (:timed-out result)])) [1 2])))
+  => [[0 false] [1 false]])

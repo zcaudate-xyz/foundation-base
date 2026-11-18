@@ -103,5 +103,13 @@
       (let [r (edn/read-string (slurp file))]
         (cond-> r (not= (:fingerprint r) (fingerprint p)) (assoc :status :stale))))}))
 (defn -main [project-var & [operation]]
-  (let [p (var-get (requiring-resolve (symbol project-var)))]
-    (try (let [result (if (= operation "run") (run-cases! p) (snapshot p))] (prn result) (when (= :error (:status result)) (throw (ex-info "Verification failed" result)))) (finally (shutdown-agents)))))
+  (try
+    (let [p (var-get (requiring-resolve (symbol project-var)))
+          result (if (= operation "run") (run-cases! p) (snapshot p))]
+      (prn result)
+      (shutdown-agents)
+      (System/exit (if (= :error (:status result)) 1 0)))
+    (catch Exception error
+      (binding [*out* *err*] (println (.getMessage error)) (prn (ex-data error)))
+      (shutdown-agents)
+      (System/exit 1))))
