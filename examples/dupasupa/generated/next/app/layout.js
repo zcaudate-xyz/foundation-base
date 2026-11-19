@@ -1,0 +1,1 @@
+import React from 'react';import {AuthProvider} from './auth.js';import './style.css';export const metadata={title:'Dupasupa campaigns'};export default function Layout({children}){return React.createElement('html',{lang:'en'},React.createElement('body',null,React.createElement(AuthProvider,null,children)));}

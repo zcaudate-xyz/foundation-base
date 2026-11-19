@@ -1,0 +1,550 @@
+{:postgres.typed/entry-counts {[:registry] 11, [:typed :enums] 0, [:typed :functions] 9, [:typed :tables] 2},
+ :postgres.typed/format :postgres.typed/context-stream,
+ :postgres.typed/metadata
+ {:postgres.typed/context
+  {:app-name "dupasupa",
+   :domain :postgres,
+   :function-filter nil,
+   :namespaces [dupasupa.db dupasupa.db.rpc dupasupa.db.tables],
+   :registration-order
+   {:functions ["ping" "list-campaigns" "validate-campaign-title" "create-owned-campaign" "save-campaign" "ret-profile" "save-profile" "list-owned-campaigns" "save-owned-campaign"], :schemas []},
+   :registry {},
+   :typed {:enums {}, :functions {}, :tables {}}},
+  :postgres.typed/format :postgres.typed/context,
+  :postgres.typed/version 1},
+ :postgres.typed/namespace-count 1,
+ :postgres.typed/namespace-metadata
+ {dupasupa.db.rpc
+  {:aliases {- dupasupa.db.rpc, pg postgres.core, tables dupasupa.db.tables},
+   :entries
+   [{:key dupasupa.db.rpc/create-owned-campaign, :path [:registry]}
+    {:key dupasupa.db.rpc/list-campaigns, :path [:registry]}
+    {:key dupasupa.db.rpc/list-owned-campaigns, :path [:registry]}
+    {:key dupasupa.db.rpc/ping, :path [:registry]}
+    {:key dupasupa.db.rpc/ret-profile, :path [:registry]}
+    {:key dupasupa.db.rpc/save-campaign, :path [:registry]}
+    {:key dupasupa.db.rpc/save-owned-campaign, :path [:registry]}
+    {:key dupasupa.db.rpc/save-profile, :path [:registry]}
+    {:key dupasupa.db.rpc/validate-campaign-title, :path [:registry]}
+    {:key dupasupa.db.rpc/create-owned-campaign, :path [:typed :functions]}
+    {:key dupasupa.db.rpc/list-campaigns, :path [:typed :functions]}
+    {:key dupasupa.db.rpc/list-owned-campaigns, :path [:typed :functions]}
+    {:key dupasupa.db.rpc/ping, :path [:typed :functions]}
+    {:key dupasupa.db.rpc/ret-profile, :path [:typed :functions]}
+    {:key dupasupa.db.rpc/save-campaign, :path [:typed :functions]}
+    {:key dupasupa.db.rpc/save-owned-campaign, :path [:typed :functions]}
+    {:key dupasupa.db.rpc/save-profile, :path [:typed :functions]}
+    {:key dupasupa.db.rpc/validate-campaign-title, :path [:typed :functions]}]}},
+ :postgres.typed/version 2}
+
+[:postgres.typed/entry
+ {:key Campaign, :path [:registry]}
+ {:postgres.typed/data
+  {:addons nil,
+   :columns
+   [{:postgres.typed/data
+     {:constraints {:primary true},
+      :default nil,
+      :enum-ref nil,
+      :foreign nil,
+      :items-schema nil,
+      :map-schema nil,
+      :name :id,
+      :ref-info nil,
+      :required false,
+      :scope :-/id,
+      :type {:postgres.typed/data {:constraints nil, :kind :primitive, :name :uuid, :ns nil}, :postgres.typed/record :type-ref}},
+     :postgres.typed/record :column-def}
+    {:postgres.typed/data
+     {:constraints {:required true},
+      :default nil,
+      :enum-ref nil,
+      :foreign nil,
+      :items-schema nil,
+      :map-schema nil,
+      :name :owner,
+      :ref-info {:key :dupasupa.db.tables/User},
+      :required true,
+      :scope :-/ref,
+      :type {:postgres.typed/data {:constraints nil, :kind :ref, :name :ref, :ns nil}, :postgres.typed/record :type-ref}},
+     :postgres.typed/record :column-def}
+    {:postgres.typed/data
+     {:constraints {:required true},
+      :default nil,
+      :enum-ref nil,
+      :foreign nil,
+      :items-schema nil,
+      :map-schema nil,
+      :name :title,
+      :ref-info nil,
+      :required true,
+      :scope :-/data,
+      :type {:postgres.typed/data {:constraints nil, :kind :primitive, :name :text, :ns nil}, :postgres.typed/record :type-ref}},
+     :postgres.typed/record :column-def}],
+   :dbschema nil,
+   :entity-meta nil,
+   :name "Campaign",
+   :ns nil,
+   :primary-key :id},
+  :postgres.typed/record :table-def}]
+
+[:postgres.typed/entry
+ {:key User, :path [:registry]}
+ {:postgres.typed/data
+  {:addons nil,
+   :columns
+   [{:postgres.typed/data
+     {:constraints {:primary true},
+      :default nil,
+      :enum-ref nil,
+      :foreign nil,
+      :items-schema nil,
+      :map-schema nil,
+      :name :id,
+      :ref-info nil,
+      :required false,
+      :scope :-/id,
+      :type {:postgres.typed/data {:constraints nil, :kind :primitive, :name :uuid, :ns nil}, :postgres.typed/record :type-ref}},
+     :postgres.typed/record :column-def}
+    {:postgres.typed/data
+     {:constraints {:required true},
+      :default nil,
+      :enum-ref nil,
+      :foreign nil,
+      :items-schema nil,
+      :map-schema nil,
+      :name :handle,
+      :ref-info nil,
+      :required true,
+      :scope :-/data,
+      :type {:postgres.typed/data {:constraints nil, :kind :primitive, :name :text, :ns nil}, :postgres.typed/record :type-ref}},
+     :postgres.typed/record :column-def}
+    {:postgres.typed/data
+     {:constraints {:required true},
+      :default "",
+      :enum-ref nil,
+      :foreign nil,
+      :items-schema nil,
+      :map-schema nil,
+      :name :display-name,
+      :ref-info nil,
+      :required true,
+      :scope :-/data,
+      :type {:postgres.typed/data {:constraints nil, :kind :primitive, :name :text, :ns nil}, :postgres.typed/record :type-ref}},
+     :postgres.typed/record :column-def}
+    {:postgres.typed/data
+     {:constraints {:required true},
+      :default "",
+      :enum-ref nil,
+      :foreign nil,
+      :items-schema nil,
+      :map-schema nil,
+      :name :bio,
+      :ref-info nil,
+      :required true,
+      :scope :-/data,
+      :type {:postgres.typed/data {:constraints nil, :kind :primitive, :name :text, :ns nil}, :postgres.typed/record :type-ref}},
+     :postgres.typed/record :column-def}],
+   :dbschema nil,
+   :entity-meta nil,
+   :name "User",
+   :ns nil,
+   :primary-key :id},
+  :postgres.typed/record :table-def}]
+
+[:postgres.typed/entry
+ {:key dupasupa.db.rpc/create-owned-campaign, :path [:registry]}
+ {:postgres.typed/data
+  {:body-meta
+   {:docstring nil,
+    :expose nil,
+    :raw-body
+    [(let
+      [(:uuid o-id) (pg/gen-random-uuid) (:text o-title) (-/validate-campaign-title i-title)]
+      (let [o-insert (pg/t:insert tables/Campaign {:id o-id, :owner i-user, :title o-title}) o-row (pg/t:get tables/Campaign {:where {:id o-id, :owner i-user}})] (return o-row)))]},
+   :dbschema "dupasupa_rpc",
+   :inputs
+   [{:postgres.typed/data {:modifiers [:uuid], :name i-user, :role :payload, :type :uuid}, :postgres.typed/record :fn-arg}
+    {:postgres.typed/data {:modifiers [:text], :name i-title, :role :payload, :type :text}, :postgres.typed/record :fn-arg}],
+   :name "create-owned-campaign",
+   :ns "dupasupa.db.rpc",
+   :output [:jsonb]},
+  :postgres.typed/record :fn-def}]
+
+[:postgres.typed/entry
+ {:key dupasupa.db.rpc/list-campaigns, :path [:registry]}
+ {:postgres.typed/data
+  {:body-meta {:docstring nil, :expose nil, :raw-body [(let [o-rows (pg/t:select tables/Campaign {:order-by [:id], :order-sort :asc})] (return (pg/coalesce o-rows (:jsonb "[]"))))]},
+   :dbschema "dupasupa_rpc",
+   :inputs [],
+   :name "list-campaigns",
+   :ns "dupasupa.db.rpc",
+   :output [:jsonb]},
+  :postgres.typed/record :fn-def}]
+
+[:postgres.typed/entry
+ {:key dupasupa.db.rpc/list-owned-campaigns, :path [:registry]}
+ {:postgres.typed/data
+  {:body-meta
+   {:docstring nil, :expose nil, :raw-body [(let [o-rows (pg/t:select tables/Campaign {:order-by [:id], :order-sort :asc, :where {:owner i-user}})] (return (pg/coalesce o-rows (:jsonb "[]"))))]},
+   :dbschema "dupasupa_rpc",
+   :inputs [{:postgres.typed/data {:modifiers [:uuid], :name i-user, :role :payload, :type :uuid}, :postgres.typed/record :fn-arg}],
+   :name "list-owned-campaigns",
+   :ns "dupasupa.db.rpc",
+   :output [:jsonb]},
+  :postgres.typed/record :fn-def}]
+
+[:postgres.typed/entry
+ {:key dupasupa.db.rpc/ping, :path [:registry]}
+ {:postgres.typed/data
+  {:body-meta {:%% :sql, :- [:text], :docstring nil, :expose nil, :raw-body [[:select "pong"]]}, :dbschema "dupasupa_rpc", :inputs [], :name "ping", :ns "dupasupa.db.rpc", :output [:text]},
+  :postgres.typed/record :fn-def}]
+
+[:postgres.typed/entry
+ {:key dupasupa.db.rpc/ret-profile, :path [:registry]}
+ {:postgres.typed/data
+  {:body-meta {:docstring nil, :expose nil, :raw-body [(let [o-user (pg/t:get tables/User {:where {:id i-user}})] (return o-user))]},
+   :dbschema "dupasupa_rpc",
+   :inputs [{:postgres.typed/data {:modifiers [:uuid], :name i-user, :role :payload, :type :uuid}, :postgres.typed/record :fn-arg}],
+   :name "ret-profile",
+   :ns "dupasupa.db.rpc",
+   :output [:jsonb]},
+  :postgres.typed/record :fn-def}]
+
+[:postgres.typed/entry
+ {:key dupasupa.db.rpc/save-campaign, :path [:registry]}
+ {:postgres.typed/data
+  {:body-meta
+   {:- [:jsonb],
+    :docstring nil,
+    :expose nil,
+    :raw-body
+    [(when (or (== i-title nil) (== (pg/btrim i-title) "")) [:raise-exception "Campaign title is required"])
+     (let [result (pg/t:update tables/Campaign {:set {:title (-/validate-campaign-title i-title)}, :where {:id i-id}})] (return result))]},
+   :dbschema "dupasupa_rpc",
+   :inputs
+   [{:postgres.typed/data {:modifiers [:uuid], :name i-id, :role :payload, :type :uuid}, :postgres.typed/record :fn-arg}
+    {:postgres.typed/data {:modifiers [:text], :name i-title, :role :payload, :type :text}, :postgres.typed/record :fn-arg}],
+   :name "save-campaign",
+   :ns "dupasupa.db.rpc",
+   :output [:jsonb]},
+  :postgres.typed/record :fn-def}]
+
+[:postgres.typed/entry
+ {:key dupasupa.db.rpc/save-owned-campaign, :path [:registry]}
+ {:postgres.typed/data
+  {:body-meta
+   {:docstring nil,
+    :expose nil,
+    :raw-body
+    [(let
+      [o-row (pg/t:get tables/Campaign {:where {:id i-id, :owner i-user}})]
+      (when [o-row :is-null] [:raise-exception "Campaign is not available to this account"])
+      (return (-/save-campaign i-id i-title)))]},
+   :dbschema "dupasupa_rpc",
+   :inputs
+   [{:postgres.typed/data {:modifiers [:uuid], :name i-user, :role :payload, :type :uuid}, :postgres.typed/record :fn-arg}
+    {:postgres.typed/data {:modifiers [:uuid], :name i-id, :role :payload, :type :uuid}, :postgres.typed/record :fn-arg}
+    {:postgres.typed/data {:modifiers [:text], :name i-title, :role :payload, :type :text}, :postgres.typed/record :fn-arg}],
+   :name "save-owned-campaign",
+   :ns "dupasupa.db.rpc",
+   :output [:jsonb]},
+  :postgres.typed/record :fn-def}]
+
+[:postgres.typed/entry
+ {:key dupasupa.db.rpc/save-profile, :path [:registry]}
+ {:postgres.typed/data
+  {:body-meta
+   {:docstring nil,
+    :expose nil,
+    :raw-body
+    [(when (or (== i-handle nil) (< (pg/length (pg/btrim i-handle)) 2) (> (pg/length i-handle) 32)) [:raise-exception "Handle must contain 2 to 32 characters"])
+     (when (or (== i-name nil) (== (pg/btrim i-name) "") (> (pg/length i-name) 80)) [:raise-exception "Display name must contain 1 to 80 characters"])
+     (when (> (pg/length (pg/coalesce i-bio "")) 500) [:raise-exception "Bio must be 500 characters or fewer"])
+     (let
+      [o-user (pg/t:update tables/User {:set {:bio (pg/coalesce i-bio ""), :display-name (pg/btrim i-name), :handle (pg/btrim i-handle)}, :where {:id i-user}})]
+      (return (-/ret-profile i-user)))]},
+   :dbschema "dupasupa_rpc",
+   :inputs
+   [{:postgres.typed/data {:modifiers [:uuid], :name i-user, :role :payload, :type :uuid}, :postgres.typed/record :fn-arg}
+    {:postgres.typed/data {:modifiers [:text], :name i-handle, :role :payload, :type :text}, :postgres.typed/record :fn-arg}
+    {:postgres.typed/data {:modifiers [:text], :name i-name, :role :payload, :type :text}, :postgres.typed/record :fn-arg}
+    {:postgres.typed/data {:modifiers [:text], :name i-bio, :role :payload, :type :text}, :postgres.typed/record :fn-arg}],
+   :name "save-profile",
+   :ns "dupasupa.db.rpc",
+   :output [:jsonb]},
+  :postgres.typed/record :fn-def}]
+
+[:postgres.typed/entry
+ {:key dupasupa.db.rpc/validate-campaign-title, :path [:registry]}
+ {:postgres.typed/data
+  {:body-meta
+   {:- [:text],
+    :docstring nil,
+    :expose nil,
+    :raw-body
+    [(when (or [i-title :is-null] (== (pg/btrim i-title) "")) [:raise-exception "Campaign title is required"])
+     (when (> (pg/length (pg/btrim i-title)) 120) [:raise-exception "Campaign title must be 120 characters or fewer"])
+     (return (pg/btrim i-title))]},
+   :dbschema "dupasupa_rpc",
+   :inputs [{:postgres.typed/data {:modifiers [:text], :name i-title, :role :payload, :type :text}, :postgres.typed/record :fn-arg}],
+   :name "validate-campaign-title",
+   :ns "dupasupa.db.rpc",
+   :output [:text]},
+  :postgres.typed/record :fn-def}]
+
+[:postgres.typed/entry
+ {:key dupasupa.db.rpc/create-owned-campaign, :path [:typed :functions]}
+ {:postgres.typed/data
+  {:body-meta
+   {:docstring nil,
+    :expose nil,
+    :raw-body
+    [(let
+      [(:uuid o-id) (pg/gen-random-uuid) (:text o-title) (-/validate-campaign-title i-title)]
+      (let [o-insert (pg/t:insert tables/Campaign {:id o-id, :owner i-user, :title o-title}) o-row (pg/t:get tables/Campaign {:where {:id o-id, :owner i-user}})] (return o-row)))]},
+   :dbschema "dupasupa_rpc",
+   :inputs
+   [{:postgres.typed/data {:modifiers [:uuid], :name i-user, :role :payload, :type :uuid}, :postgres.typed/record :fn-arg}
+    {:postgres.typed/data {:modifiers [:text], :name i-title, :role :payload, :type :text}, :postgres.typed/record :fn-arg}],
+   :name "create-owned-campaign",
+   :ns "dupasupa.db.rpc",
+   :output [:jsonb]},
+  :postgres.typed/record :fn-def}]
+
+[:postgres.typed/entry
+ {:key dupasupa.db.rpc/list-campaigns, :path [:typed :functions]}
+ {:postgres.typed/data
+  {:body-meta {:docstring nil, :expose nil, :raw-body [(let [o-rows (pg/t:select tables/Campaign {:order-by [:id], :order-sort :asc})] (return (pg/coalesce o-rows (:jsonb "[]"))))]},
+   :dbschema "dupasupa_rpc",
+   :inputs [],
+   :name "list-campaigns",
+   :ns "dupasupa.db.rpc",
+   :output [:jsonb]},
+  :postgres.typed/record :fn-def}]
+
+[:postgres.typed/entry
+ {:key dupasupa.db.rpc/list-owned-campaigns, :path [:typed :functions]}
+ {:postgres.typed/data
+  {:body-meta
+   {:docstring nil, :expose nil, :raw-body [(let [o-rows (pg/t:select tables/Campaign {:order-by [:id], :order-sort :asc, :where {:owner i-user}})] (return (pg/coalesce o-rows (:jsonb "[]"))))]},
+   :dbschema "dupasupa_rpc",
+   :inputs [{:postgres.typed/data {:modifiers [:uuid], :name i-user, :role :payload, :type :uuid}, :postgres.typed/record :fn-arg}],
+   :name "list-owned-campaigns",
+   :ns "dupasupa.db.rpc",
+   :output [:jsonb]},
+  :postgres.typed/record :fn-def}]
+
+[:postgres.typed/entry
+ {:key dupasupa.db.rpc/ping, :path [:typed :functions]}
+ {:postgres.typed/data
+  {:body-meta {:%% :sql, :- [:text], :docstring nil, :expose nil, :raw-body [[:select "pong"]]}, :dbschema "dupasupa_rpc", :inputs [], :name "ping", :ns "dupasupa.db.rpc", :output [:text]},
+  :postgres.typed/record :fn-def}]
+
+[:postgres.typed/entry
+ {:key dupasupa.db.rpc/ret-profile, :path [:typed :functions]}
+ {:postgres.typed/data
+  {:body-meta {:docstring nil, :expose nil, :raw-body [(let [o-user (pg/t:get tables/User {:where {:id i-user}})] (return o-user))]},
+   :dbschema "dupasupa_rpc",
+   :inputs [{:postgres.typed/data {:modifiers [:uuid], :name i-user, :role :payload, :type :uuid}, :postgres.typed/record :fn-arg}],
+   :name "ret-profile",
+   :ns "dupasupa.db.rpc",
+   :output [:jsonb]},
+  :postgres.typed/record :fn-def}]
+
+[:postgres.typed/entry
+ {:key dupasupa.db.rpc/save-campaign, :path [:typed :functions]}
+ {:postgres.typed/data
+  {:body-meta
+   {:- [:jsonb],
+    :docstring nil,
+    :expose nil,
+    :raw-body
+    [(when (or (== i-title nil) (== (pg/btrim i-title) "")) [:raise-exception "Campaign title is required"])
+     (let [result (pg/t:update tables/Campaign {:set {:title (-/validate-campaign-title i-title)}, :where {:id i-id}})] (return result))]},
+   :dbschema "dupasupa_rpc",
+   :inputs
+   [{:postgres.typed/data {:modifiers [:uuid], :name i-id, :role :payload, :type :uuid}, :postgres.typed/record :fn-arg}
+    {:postgres.typed/data {:modifiers [:text], :name i-title, :role :payload, :type :text}, :postgres.typed/record :fn-arg}],
+   :name "save-campaign",
+   :ns "dupasupa.db.rpc",
+   :output [:jsonb]},
+  :postgres.typed/record :fn-def}]
+
+[:postgres.typed/entry
+ {:key dupasupa.db.rpc/save-owned-campaign, :path [:typed :functions]}
+ {:postgres.typed/data
+  {:body-meta
+   {:docstring nil,
+    :expose nil,
+    :raw-body
+    [(let
+      [o-row (pg/t:get tables/Campaign {:where {:id i-id, :owner i-user}})]
+      (when [o-row :is-null] [:raise-exception "Campaign is not available to this account"])
+      (return (-/save-campaign i-id i-title)))]},
+   :dbschema "dupasupa_rpc",
+   :inputs
+   [{:postgres.typed/data {:modifiers [:uuid], :name i-user, :role :payload, :type :uuid}, :postgres.typed/record :fn-arg}
+    {:postgres.typed/data {:modifiers [:uuid], :name i-id, :role :payload, :type :uuid}, :postgres.typed/record :fn-arg}
+    {:postgres.typed/data {:modifiers [:text], :name i-title, :role :payload, :type :text}, :postgres.typed/record :fn-arg}],
+   :name "save-owned-campaign",
+   :ns "dupasupa.db.rpc",
+   :output [:jsonb]},
+  :postgres.typed/record :fn-def}]
+
+[:postgres.typed/entry
+ {:key dupasupa.db.rpc/save-profile, :path [:typed :functions]}
+ {:postgres.typed/data
+  {:body-meta
+   {:docstring nil,
+    :expose nil,
+    :raw-body
+    [(when (or (== i-handle nil) (< (pg/length (pg/btrim i-handle)) 2) (> (pg/length i-handle) 32)) [:raise-exception "Handle must contain 2 to 32 characters"])
+     (when (or (== i-name nil) (== (pg/btrim i-name) "") (> (pg/length i-name) 80)) [:raise-exception "Display name must contain 1 to 80 characters"])
+     (when (> (pg/length (pg/coalesce i-bio "")) 500) [:raise-exception "Bio must be 500 characters or fewer"])
+     (let
+      [o-user (pg/t:update tables/User {:set {:bio (pg/coalesce i-bio ""), :display-name (pg/btrim i-name), :handle (pg/btrim i-handle)}, :where {:id i-user}})]
+      (return (-/ret-profile i-user)))]},
+   :dbschema "dupasupa_rpc",
+   :inputs
+   [{:postgres.typed/data {:modifiers [:uuid], :name i-user, :role :payload, :type :uuid}, :postgres.typed/record :fn-arg}
+    {:postgres.typed/data {:modifiers [:text], :name i-handle, :role :payload, :type :text}, :postgres.typed/record :fn-arg}
+    {:postgres.typed/data {:modifiers [:text], :name i-name, :role :payload, :type :text}, :postgres.typed/record :fn-arg}
+    {:postgres.typed/data {:modifiers [:text], :name i-bio, :role :payload, :type :text}, :postgres.typed/record :fn-arg}],
+   :name "save-profile",
+   :ns "dupasupa.db.rpc",
+   :output [:jsonb]},
+  :postgres.typed/record :fn-def}]
+
+[:postgres.typed/entry
+ {:key dupasupa.db.rpc/validate-campaign-title, :path [:typed :functions]}
+ {:postgres.typed/data
+  {:body-meta
+   {:- [:text],
+    :docstring nil,
+    :expose nil,
+    :raw-body
+    [(when (or [i-title :is-null] (== (pg/btrim i-title) "")) [:raise-exception "Campaign title is required"])
+     (when (> (pg/length (pg/btrim i-title)) 120) [:raise-exception "Campaign title must be 120 characters or fewer"])
+     (return (pg/btrim i-title))]},
+   :dbschema "dupasupa_rpc",
+   :inputs [{:postgres.typed/data {:modifiers [:text], :name i-title, :role :payload, :type :text}, :postgres.typed/record :fn-arg}],
+   :name "validate-campaign-title",
+   :ns "dupasupa.db.rpc",
+   :output [:text]},
+  :postgres.typed/record :fn-def}]
+
+[:postgres.typed/entry
+ {:key Campaign, :path [:typed :tables]}
+ {:postgres.typed/data
+  {:addons nil,
+   :columns
+   [{:postgres.typed/data
+     {:constraints {:primary true},
+      :default nil,
+      :enum-ref nil,
+      :foreign nil,
+      :items-schema nil,
+      :map-schema nil,
+      :name :id,
+      :ref-info nil,
+      :required false,
+      :scope :-/id,
+      :type {:postgres.typed/data {:constraints nil, :kind :primitive, :name :uuid, :ns nil}, :postgres.typed/record :type-ref}},
+     :postgres.typed/record :column-def}
+    {:postgres.typed/data
+     {:constraints {:required true},
+      :default nil,
+      :enum-ref nil,
+      :foreign nil,
+      :items-schema nil,
+      :map-schema nil,
+      :name :owner,
+      :ref-info {:key :dupasupa.db.tables/User},
+      :required true,
+      :scope :-/ref,
+      :type {:postgres.typed/data {:constraints nil, :kind :ref, :name :ref, :ns nil}, :postgres.typed/record :type-ref}},
+     :postgres.typed/record :column-def}
+    {:postgres.typed/data
+     {:constraints {:required true},
+      :default nil,
+      :enum-ref nil,
+      :foreign nil,
+      :items-schema nil,
+      :map-schema nil,
+      :name :title,
+      :ref-info nil,
+      :required true,
+      :scope :-/data,
+      :type {:postgres.typed/data {:constraints nil, :kind :primitive, :name :text, :ns nil}, :postgres.typed/record :type-ref}},
+     :postgres.typed/record :column-def}],
+   :dbschema nil,
+   :entity-meta nil,
+   :name "Campaign",
+   :ns nil,
+   :primary-key :id},
+  :postgres.typed/record :table-def}]
+
+[:postgres.typed/entry
+ {:key User, :path [:typed :tables]}
+ {:postgres.typed/data
+  {:addons nil,
+   :columns
+   [{:postgres.typed/data
+     {:constraints {:primary true},
+      :default nil,
+      :enum-ref nil,
+      :foreign nil,
+      :items-schema nil,
+      :map-schema nil,
+      :name :id,
+      :ref-info nil,
+      :required false,
+      :scope :-/id,
+      :type {:postgres.typed/data {:constraints nil, :kind :primitive, :name :uuid, :ns nil}, :postgres.typed/record :type-ref}},
+     :postgres.typed/record :column-def}
+    {:postgres.typed/data
+     {:constraints {:required true},
+      :default nil,
+      :enum-ref nil,
+      :foreign nil,
+      :items-schema nil,
+      :map-schema nil,
+      :name :handle,
+      :ref-info nil,
+      :required true,
+      :scope :-/data,
+      :type {:postgres.typed/data {:constraints nil, :kind :primitive, :name :text, :ns nil}, :postgres.typed/record :type-ref}},
+     :postgres.typed/record :column-def}
+    {:postgres.typed/data
+     {:constraints {:required true},
+      :default "",
+      :enum-ref nil,
+      :foreign nil,
+      :items-schema nil,
+      :map-schema nil,
+      :name :display-name,
+      :ref-info nil,
+      :required true,
+      :scope :-/data,
+      :type {:postgres.typed/data {:constraints nil, :kind :primitive, :name :text, :ns nil}, :postgres.typed/record :type-ref}},
+     :postgres.typed/record :column-def}
+    {:postgres.typed/data
+     {:constraints {:required true},
+      :default "",
+      :enum-ref nil,
+      :foreign nil,
+      :items-schema nil,
+      :map-schema nil,
+      :name :bio,
+      :ref-info nil,
+      :required true,
+      :scope :-/data,
+      :type {:postgres.typed/data {:constraints nil, :kind :primitive, :name :text, :ns nil}, :postgres.typed/record :type-ref}},
+     :postgres.typed/record :column-def}],
+   :dbschema nil,
+   :entity-meta nil,
+   :name "User",
+   :ns nil,
+   :primary-key :id},
+  :postgres.typed/record :table-def}]

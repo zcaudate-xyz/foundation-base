@@ -1,0 +1,124 @@
+import * as runtime from './libs/app/manage/page-runtime.mjs'
+
+export var DEFINITIONS = [
+  {
+  "routes":["/","/web-main"],
+  "group_id":"web-main/campaigns",
+  "actions":{
+    "create":{
+      "operation":"create-owned-campaign",
+      "operation-spec":{
+        "id":"create-owned-campaign",
+        "schema":"dupasupa_rpc",
+        "input":[
+          {"name":"i_user","symbol":"i_user","type":"uuid"},
+          {"name":"i_title","symbol":"i_title","type":"text"}
+        ],
+        "return":"jsonb",
+        "flags":{},
+        "write":true
+      },
+      "transport":{
+        "method":"POST",
+        "path":"/api/campaigns",
+        "constants":{"action":"create"},
+        "bindings":{"title":"i_title"}
+      }
+    },
+    "save":{
+      "operation":"save-owned-campaign",
+      "operation-spec":{
+        "id":"save-owned-campaign",
+        "schema":"dupasupa_rpc",
+        "input":[
+          {"name":"i_user","symbol":"i_user","type":"uuid"},
+          {"name":"i_id","symbol":"i_id","type":"uuid"},
+          {"name":"i_title","symbol":"i_title","type":"text"}
+        ],
+        "return":"jsonb",
+        "flags":{},
+        "write":true
+      },
+      "transport":{
+        "method":"POST",
+        "path":"/api/campaigns",
+        "constants":{"action":"save"},
+        "bindings":{"id":"i_id","title":"i_title"}
+      }
+    }
+  },
+  "models":{
+    "rows":{
+      "operation":"list-owned-campaigns",
+      "operation-spec":{
+        "id":"list-owned-campaigns",
+        "schema":"dupasupa_rpc",
+        "input":[{"name":"i_user","symbol":"i_user","type":"uuid"}],
+        "return":"jsonb",
+        "flags":{},
+        "write":false
+      },
+      "kind":"dataview",
+      "table":"Campaign",
+      "transport":{"method":"GET","path":"/api/campaigns"}
+    }
+  },
+  "id":"campaigns",
+  "runtime":"Generated Substrate campaign model → verified-session Next handlers → local PostgreSQL. Each scenario owns a disposable database and Auth users.",
+  "kind":"screen",
+  "order":["rows"],
+  "area":"member",
+  "target":"next"
+},
+  {
+  "id":"profile",
+  "routes":["/profile"],
+  "area":"member",
+  "kind":"screen",
+  "models":{
+    "profile":{
+      "operation":"ret-profile",
+      "operation-spec":{
+        "id":"ret-profile",
+        "schema":"dupasupa_rpc",
+        "input":[{"name":"i_user","symbol":"i_user","type":"uuid"}],
+        "return":"jsonb",
+        "flags":{},
+        "write":false
+      },
+      "transport":{"method":"GET","path":"/api/profile"}
+    }
+  },
+  "actions":{
+    "save":{
+      "operation":"save-profile",
+      "operation-spec":{
+        "id":"save-profile",
+        "schema":"dupasupa_rpc",
+        "input":[
+          {"name":"i_user","symbol":"i_user","type":"uuid"},
+          {"name":"i_handle","symbol":"i_handle","type":"text"},
+          {"name":"i_name","symbol":"i_name","type":"text"},
+          {"name":"i_bio","symbol":"i_bio","type":"text"}
+        ],
+        "return":"jsonb",
+        "flags":{},
+        "write":true
+      },
+      "transport":{
+        "method":"POST",
+        "path":"/api/profile",
+        "bindings":{"handle":"handle","display_name":"display_name","bio":"bio"}
+      }
+    }
+  },
+  "target":"next",
+  "runtime":"Profile reads use the verified-session Next handler. Profile mutations are tested in the DB/UI scaffold; not yet available in this workbench."
+}
+];
+
+export function request(page,kind,member,values){
+  return runtime.request(runtime.entry(DEFINITIONS,page,kind,member),values);
+}
+
+export default {["DEFINITIONS"]:DEFINITIONS,["request"]:request}
