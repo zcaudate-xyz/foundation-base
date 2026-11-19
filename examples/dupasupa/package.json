@@ -1,0 +1,26 @@
+{
+  "name": "dupasupa-integration",
+  "private": true,
+  "devDependencies": {
+    "@juggle/resize-observer": "3.4.0",
+    "css-mediaquery": "0.1.2",
+    "window": "4.2.7"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "2.56.0",
+    "@tamagui/config": "1.144.1",
+    "@tamagui/lucide-icons": "1.144.1",
+    "@tamagui/react-native-svg": "1.144.1",
+    "next": "16.4.4",
+    "pg": "8.20.0",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "react-native-web": "0.21.2",
+    "tamagui": "1.144.1"
+  },
+  "scripts": {
+    "dev": "next dev generated/next --hostname 127.0.0.1 --port 8000",
+    "build": "DUPASUPA_NEXT_DIST_DIR=.next-build next build generated/next --webpack",
+    "start": "next start generated/next --hostname 127.0.0.1 --port 8000"
+  }
+}

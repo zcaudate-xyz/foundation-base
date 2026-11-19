@@ -1,0 +1,8 @@
+{
+  "source": "statstrade-v2/src-app/statsui/basic/layout/common/frame_devtool.clj",
+  "source-sha256": "de06fc5b052efd84b437a8e99030150cceb1fcc145b8151241cb8194ae17de86",
+  "namespace-from": "statsui.basic.layout.common.frame-devtool",
+  "namespace-to": "app.nextjs.devtools",
+  "scope": "Devtools only; application layouts, domain groups and schemas are excluded.",
+  "support-source": "statstrade-v2/src-app/statsui/basic/ui_common.clj (PopoverMenu only)"
+}

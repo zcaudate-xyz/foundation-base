@@ -349,3 +349,19 @@ unchanged, and periodic status polling preserves the live iframe.
 For example, FinFolk's native event preview is `#/previews/native-events` and its
 account preview is `#/previews/native-account`. Existing `?view=previews` links
 remain supported; a hash route takes precedence.
+
+### Pages & models in Dupasupa
+
+Dupasupa declares the shared FinFolk page/model workbench through `:pages`,
+`:page-verifier`, `:page-test-fixture`, `:verification-targets`, and a generated
+`:verification-receipt`. Open http://127.0.0.1:8130 → **Pages & models**. The registry
+lists campaign models/actions and the authenticated profile read. Saved declarative
+cases live in `examples/dupasupa/.app-manage/page-tests.edn`; transient evidence is
+under `.cache/app.manage`. The emitted DSL verifier runs the actual campaign model
+and verified Next handlers with a disposable local PostgreSQL/Auth fixture.
+
+Run saved checks with `lein run -m app.manage.verify dupasupa.build/PROJECT run`
+from the example directory. The declared `page-model-verification` check owns the
+Clojure assertions and includes the emitted manager UI/HTTP workflow. Unsupported
+operations are blocked, positive expectations cannot pass on errors, and source or
+artifact edits invalidate runtime receipts and previous evidence.

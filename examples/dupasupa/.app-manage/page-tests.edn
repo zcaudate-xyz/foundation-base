@@ -1,0 +1,26 @@
+{:revision 1
+ :cases
+ {"campaign-lifecycle"
+  {:steps
+   [{:id "initial" :page "campaigns" :kind "model" :member "rows" :actor "alice" :expect {:contains {:count 1}}}
+    {:id "create" :page "campaigns" :kind "action" :member "create" :actor "alice"
+     :payload {:title "  New campaign  "} :expect {:contains {:title "New campaign"}}}
+    {:id "save" :page "campaigns" :kind "action" :member "save" :actor "alice"
+     :payload {:id {:$ref ["create" "result" "id"]} :title "Updated campaign"}
+     :expect {:contains {:title "Updated campaign"}}}
+    {:id "alice-page" :page "campaigns" :kind "page" :actor "alice" :expect {:contains {:count 2}}}
+    {:id "bob-read" :page "campaigns" :kind "model" :member "rows" :actor "bob" :expect {:equals {:output [] :count 0}}}
+    {:id "bob-edit" :page "campaigns" :kind "action" :member "save" :actor "bob"
+     :payload {:id {:$ref ["create" "result" "id"]} :title "Stolen campaign"}
+     :expect {:error {:status 400 :message "Campaign is not available to this account"}}}
+    {:id "blank-title" :page "campaigns" :kind "action" :member "create" :actor "alice"
+     :payload {:title "   "} :expect {:error {:status 400 :message "Campaign title is required"}}}
+    {:id "unchanged" :page "campaigns" :kind "model" :member "rows" :actor "alice" :expect {:contains {:count 2}}}
+    {:id "signed-out" :page "campaigns" :kind "model" :member "rows" :actor "anon"
+     :expect {:error {:status 401 :message "Sign in to continue."}}}
+    {:id "profile" :page "profile" :kind "model" :member "profile" :actor "bob"
+     :expect {:contains {:handle "bob" :display_name "Bob Demo"}}}
+    {:id "long-title" :page "campaigns" :kind "action" :member "create" :actor "alice"
+     :payload {:title "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"} :expect {:error {:status 400 :message "Campaign title must be 120 characters or fewer"}}}
+    {:id "null-title" :page "campaigns" :kind "action" :member "create" :actor "alice"
+     :payload {:title nil} :expect {:error {:status 400 :message "Campaign title is required"}}}]}}}

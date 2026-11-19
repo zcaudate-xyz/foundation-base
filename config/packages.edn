@@ -1,4 +1,9 @@
-{xyz.zcaudate/app.manage
+{xyz.zcaudate/app.nextjs
+ {:description "Next.js/Supabase devtools copied from statsui, without application layouts"
+  :include [[app.nextjs :complete]]
+  :bundle [{:path "resources" :include ["app.nextjs"]}]}
+
+ xyz.zcaudate/app.manage
  {:description "Clojure application builds, integration checks, watching and management UI"
   :include [[app.manage :complete]]
   :bundle [{:path "resources" :include ["assets/app.manage"]}]}

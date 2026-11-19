@@ -1,0 +1,14 @@
+/target/
+/.lang/
+/.lein-failures
+/.nrepl-port
+
+/node_modules/
+
+/generated/next/.next/
+/generated/next/node_modules/
+
+/generated/next/.next-build/
+/generated/next/AGENTS.md
+
+/.cache/
